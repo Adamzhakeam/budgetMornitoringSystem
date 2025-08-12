@@ -363,19 +363,53 @@ expenditures = [
         }
     }
 ]
+
+def budgetQuaterPerformance(budgetId: str):
+    """
+    Calculates performance metrics for each quarter of a budget.
+    Handles cases where disbursements or expenditures have multiple records.
+    
+    Args:
+        budgetId (str): The budget ID to analyze
+        
+    Returns:
+        tuple: (quaterDsb, quaterExp) - Lists of disbursed and expended amounts per quarter
+    """
+    qd = db.getQuartersByBudgetId(budgetId)
+    if not qd['status']:
+        return qd['log']  # Return empty lists if no quarters found
+    
+    quaters = [quarter['quaterId'] for quarter in qd['data']]
+    quaterDsb = []
+    quaterExp = []
+    
+    for quaterId in quaters:
+        # Get disbursements and expenditures for this quarter
+        dsbR = db.getDisbursementsByBudgetQuarter(budgetId, quaterId)
+        expR = db.getExpendituresByBudgetQuarter(budgetId, quaterId)
+        pprint.pprint(expR)
+        # Calculate total disbursed amount (sum all if multiple records)
+        total_dsb = 0
+        if dsbR['status'] and len(dsbR['data']) > 0:
+            total_dsb = sum(d['amountReleased'] for d in dsbR['data'])
+        
+        # Calculate total expended amount (sum all if multiple records)
+        total_exp = 0
+        if expR['status'] and len(expR['data']) > 0:
+            total_exp = sum(e['amountSpent'] for e in expR['data'])
+        
+        quaterDsb.append(total_dsb)
+        quaterExp.append(total_exp)
+    
+    return quaterDsb, quaterExp
 if __name__ == "__main__":
     
+    # pprint.pprint(budgetQuaterPerformance("bIDziMnNLhw"))
     # for quater in expenditures:
     #     print(db.insertDataIntoExpenditure(quater))
     # pprint.pprint(db.getExpendituresByBudgetQuarter("bIDziMnNLhw","qIdWoekU3"))
     # pprint.pprint(db.getQuartersByBudgetId('bIDziMnNLhw'))
     
-    def budgetQuaterPerformance(budgetId:str):
-        qd = db.getQuartersByBudgetId(budgetId)['data']
-        quaters = [],proposedAmount = 0,workingAmount = 0
-        for index in range(len(qd)):
-            quaters.append(qd[index]['quaterId'])
-        for index in range(len(quaters)):
-            pass
+  
     print(budgetQuaterPerformance('bIDziMnNLhw'))
         

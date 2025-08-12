@@ -553,7 +553,7 @@ def insertDataIntoPerformance(performanceDetails: dict) -> dict:
         return insertionResponse
 def init():
     defaults = {
-        'rootPath':'/home/predator/Desktop/bbms',
+        'rootPath':'/workspaces/budgetMornitoringSystem/budgetMonitoring',
         'dbName':'bbms',
         'tables':{
              'fundDetails':'''
