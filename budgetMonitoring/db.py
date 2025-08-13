@@ -325,7 +325,8 @@ def insertDataIntoDisbursement(disbursementDetails: dict) -> dict:
     tables = kutils.config.getValue('bbmsDb/tables')
     entryId = 'dID' + kutils.codes.new(8)  # Generate unique ID
     timestamp = kutils.dates.currentTimestamp()
-    quaterId = utils.quarterIdForExpense({'dateOfExpense':disbursementDetails['disbursementDate']})['data']['quaterId']
+    quaterId = utils.quarterIdForExpense({'dateOfExpense':disbursementDetails['disbursementDate'],
+                                          'budgetId':disbursementDetails['budgetId']})['data']['quaterId']
     # quaterId = quarter_id['quarterId']
     with kutils.db.Api(dbPath, tables, readonly=False) as db:
         insertionResponse = db.insert(
@@ -370,7 +371,8 @@ def insertDataIntoExpenditure(expenditureDetails: dict) -> dict:
     tables = kutils.config.getValue('bbmsDb/tables')
     entryId = 'eID' + kutils.codes.new(8)  # Generate unique expenditure ID
     timestamp = kutils.dates.currentTimestamp()
-    quaterId = utils.quarterIdForExpense({'dateOfExpense':expenditureDetails['dateOfExpense']})['data']['quaterId']
+    quaterId = utils.quarterIdForExpense({'dateOfExpense':expenditureDetails['dateOfExpense'],
+                                          'budgetId':expenditureDetails['budgetId']})['data']['quaterId']
     with kutils.db.Api(dbPath, tables, readonly=False) as db:
         insertionResponse = db.insert(
             'expenditure',
@@ -455,6 +457,40 @@ def getQuartersByBudgetId(budgetId: str) -> dict:
         'returnGenerator': False 
         
     })    
+
+
+        
+    
+    
+def getPalnnedByBudgetId(budgetId: str) -> dict:
+    """
+    Retrieves all quarters associated with a specific budgetId
+    
+    Args:
+        budgetId (str): The budget ID to filter quarters
+        
+           
+    Returns:
+        dict: {
+            'status': bool, 
+            'data': list[dict] if status=True, 
+            'log': str if status=False
+        }
+        
+    """
+    return getAnyTableData({
+        'tableName': 'budget',
+        'columns': ['detailsOfBudget'],
+        'condition': 'budgetId = ?',
+        'conditionalData': [budgetId],
+        'limit':1,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False 
+        
+    })    
+
     
 def getDisbursementsByBudgetQuarter(budgetId: str, quaterId: str) -> dict:
     """
