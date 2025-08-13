@@ -96,25 +96,7 @@ def quarterIdForExpense(expenseDetails: dict) -> dict:
 def getQuarterlyPerfromanceMetric(budgetId: str) -> dict:
     """
     Returns performance metrics with category-based analysis and item-level details:
-    {
-        "Q1-2023": {
-            "financial": { ... },  # Same as before
-            "category_analysis": {
-                "Materials": {
-                    "planned": float,
-                    "actual": float,
-                    "variance": float,
-                    "items": {
-                        "Textbooks": {"actual": 500000, "variance": -20000},
-                        "Notebooks": {"actual": 300000, "variance": +50000}
-                    }
-                },
-                ...
-            },
-            "budget_health": { ... }  # Same as before
-        },
-        ...
-    }
+    
     """
     # Get all quarters
     quarters_res = db.getQuartersByBudgetId(budgetId)
