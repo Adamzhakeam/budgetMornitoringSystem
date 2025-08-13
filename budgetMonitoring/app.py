@@ -104,7 +104,28 @@ def home():
     return render_template('index.html')
 
 # ------the module below is responsible fo handling user and roles  related endpoints 
-
+@app.route('/getQuarterMetrics',methods=['POST'])
+def handleQuarterMetrics():
+    from utils import getQuarterlyPerfromanceMetric
+    
+    payload = request.get_json()
+    payloadStructure = {
+        'budgetId' : kutils.config.getValue('bbmsDb/budgetId')
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    
+    if validationResponse['status']:
+         for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+                
+         metrics = getQuarterlyPerfromanceMetric(payload['budgetId'])
+         return metrics 
+     
+     
 @app.route('/adduser',methods=['POST'])
 # @role_required(['MANAGER'])
 def handleAdduser():
@@ -175,6 +196,7 @@ def init():
             'password':str,
             'role':str,
             'others':dict,
+            'budgetId':str,
             'SECRETE_KEY':kutils.codes.new(),
             'SESSION_TYPE':'filesystem',
             'SESSION_PERMANENT':False,
@@ -193,8 +215,8 @@ def init():
 init()
 
 if __name__ == "__main__":
-    print(sendDynamicMail({'recipients':['kisiturashid01@gmail.com'],'message':'massage','subject':'work'}))
-    #  app.run(debug=True,host = '0.0.0.0',port = 5000)
+    # print(sendDynamicMail({'recipients':['kisiturashid01@gmail.com'],'message':'massage','subject':'work'}))
+     app.run(debug=True,host = '0.0.0.0',port = 5000)
     #  app.run(debug=True,host = '0.0.0.0',port = 8080) but the am getting this error predator@predator ~/D/p/budgetMonitoring> python3 app.py
 
-{'status': False, 'log': "Failed to send email: (530, b'5.7.0 Authentication Required. For more information, go to\\n5.7.0  https://support.google.com/accounts/troubleshooter/2402620. 5b1f17b1804b1-4587054f22esm190107285e9.9 - gsmtp', '=?utf-8?q?BBMS_System?= <adamzhakeam@gmail.com>')"}
+# {'status': False, 'log': "Failed to send email: (530, b'5.7.0 Authentication Required. For more information, go to\\n5.7.0  https://support.google.com/accounts/troubleshooter/2402620. 5b1f17b1804b1-4587054f22esm190107285e9.9 - gsmtp', '=?utf-8?q?BBMS_System?= <adamzhakeam@gmail.com>')"}

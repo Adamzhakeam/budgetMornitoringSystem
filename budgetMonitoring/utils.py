@@ -177,7 +177,7 @@ def calculateFinancialMetrics(planned: float, disbursed: float,
         "disbursed": disbursed,
         "expended": expended,
         "variance": disbursed - expended,
-        "std_dev": pd.Series(items).std() if len(items) > 1 else 0.0
+        "std_dev": None #pd.Series(items).std() if len(items) > 1 else 0.0
     }
 
 def calculateUtilisation(disbursed: float, expended: float) -> dict:

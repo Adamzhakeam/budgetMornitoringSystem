@@ -533,4 +533,4 @@ if __name__ == "__main__":
     # plot_quarterly_pies_detailed('bIDvWU6mkod','/workspaces/budgetMornitoringSystem/budgetMonitoring/database')
     pprint.pprint(metrics)
     # print(plot_quarterly_activities(metrics,save_path='quarterly_performance.png'))
-        
+        # pass

@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f9fc;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    background: #004d99;
+    color: white;
+    padding: 15px 0;
+    margin-bottom: 20px;
+}
+
+.quarter-section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px auto;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.quarter-title {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.chart-container {
+    flex: 1 1 45%;
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+}
+
+canvas {
+    max-width: 100%;
+}
