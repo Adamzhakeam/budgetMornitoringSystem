@@ -1,155 +1,5 @@
 '''
-    
-def budgetQuarterPerformance(budgetId: str) -> dict:
-    """
-    Analyzes budget performance per quarter with statistical metrics
-    Returns: {
-        "quarterId1": {
-            "disbursed": float,
-            "expended": float,
-            "variance": float,
-            "std_dev": float,
-            "item_behavior": dict,
-            "budget_performance": dict
-        },
-        ...
-    }
-    """
-    # Get quarter data
-    qd = db.getQuartersByBudgetId(budgetId)
-    if not qd['status']:
-        return {"error": qd['log']}
-    
-    # Initialize results dictionary
-    performance_results = {}
-    
-    # Convert to DataFrame for statistical calculations
-    quarters_df = pd.DataFrame(qd['data'])
-    
-    for _, quarter in quarters_df.iterrows():
-        quarter_id = quarter['quaterId']
-        quarter_results = analyze_quarter_performance(budgetId, quarter_id)
-        performance_results[quarter_id] = quarter_results
-    
-    # Add cross-quarter statistical analysis
-    add_cross_quarter_analysis(performance_results)
-    
-    return performance_results
-
-def analyze_quarter_performance(budgetId: str, quarterId: str) -> dict:
-    """Analyzes performance for a single quarter with statistical metrics"""
-    # Get financial data
-    dsbR = db.getDisbursementsByBudgetQuarter(budgetId, quarterId)
-    expR = db.getExpendituresByBudgetQuarter(budgetId, quarterId)
-    
-    # Convert to DataFrames
-    disbursements = pd.DataFrame(dsbR['data']) if dsbR['status'] else pd.DataFrame()
-    expenditures = pd.DataFrame(expR['data']) if expR['status'] else pd.DataFrame()
-    
-    # Initialize results
-    results = {
-        "disbursed": 0.0,
-        "expended": 0.0,
-        "variance": None,
-        "std_dev": None,
-        "item_behavior": {},
-        "budget_performance": {}
-    }
-    
-    # Calculate disbursements
-    if not disbursements.empty:
-        results["disbursed"] = disbursements['amountReleased'].sum()
-        
-    # Calculate expenditures with variance/std
-    if not expenditures.empty:
-        # Expand expenditure items
-        exp_items = []
-        for _, row in expenditures.iterrows():
-            details = row['detailsOfExpense']
-            for i in range(len(details['items'])):
-                exp_items.append({
-                    'item': details['items'][i],
-                    'amount': details['amount'][i] * details['quantity'][i],
-                    'unit_price': details['amount'][i],
-                    'quantity': details['quantity'][i]
-                })
-        
-        exp_df = pd.DataFrame(exp_items)
-        results["expended"] = exp_df['amount'].sum()
-        
-        # Calculate variance and std dev
-        if len(exp_df) > 1:
-            results["variance"] = exp_df['amount'].var()
-            results["std_dev"] = exp_df['amount'].std()
-        
-        # Item behavior analysis
-        planned_items = get_planned_items(budgetId, quarterId)
-        if planned_items:
-            actual_items = exp_df.groupby('item')['amount'].sum().to_dict()
-            results["item_behavior"] = utils.getItemExpendutureBehaviour(
-                proposedItemDetails={'itemTotals': planned_items},
-                actualItemDetails={'itemTotals': actual_items}
-            )
-        
-        # Budget performance
-        results["budget_performance"] = utils.getOverallPercentages(
-            budgetAmount={'workingAmount': results["disbursed"]},
-            expenditureAmount={'totalExpenses': results["expended"]}
-        )
-    
-    return results
-
-def add_cross_quarter_analysis(performance_data: dict):
-    """Adds cross-quarter statistical analysis"""
-    quarters = list(performance_data.keys())
-    disbursed = [v['disbursed'] for v in performance_data.values()]
-    expended = [v['expended'] for v in performance_data.values()]
-    
-    if len(quarters) > 1:
-        # Calculate trends across quarters
-        disbursed_series = pd.Series(disbursed)
-        expended_series = pd.Series(expended)
-        
-        for i, q in enumerate(quarters):
-            performance_data[q].update({
-                "disbursed_trend": None if i == 0 else disbursed[i] - disbursed[i-1],
-                "expended_trend": None if i == 0 else expended[i] - expended[i-1],
-                "disbursed_rolling_avg": disbursed_series[:i+1].mean() if i > 0 else None,
-                "expended_rolling_avg": expended_series[:i+1].mean() if i > 0 else None
-            })
-
-def get_planned_items(budgetId: str) -> dict:
-    """
-    Retrieves original planned items/amounts by multiplying quantity × amount
-    from the budget's detailsOfBudget field.
-    
-    Args:
-        budgetId: The budget ID to lookup
-        
-    Returns:
-        {
-            "Essential Medicines": 2,500,000,  # 100,000 × 25
-            "Hospital Equipment": 2,000,000,   # 50 × 40,000
-            "Staff Salaries": 1,800,000        # 120 × 15,000
-        }
-        or empty dict if no data
-    """
-    # 1. Get the budget data
-    budget = db.getPalnnedByBudgetId(budgetId)
-    if not budget.get('status') or not budget['data']:
-        return {}
-    
-    # 2. Extract and calculate planned amounts
-    details = budget['data'][0]['detailsOfBudget']  # Access first record's details
-    planned = {}
-    
-    for i in range(len(details['items'])):
-        item_name = details['items'][i]
-        total = details['quantity'][i] * details['amount'][i]
-        planned[item_name] = total
-    
-    return planned
-
+hey this is a testing module     
 '''
 
 import db
@@ -160,214 +10,450 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 import os
-quarters_education = [
+quarters = [
+    # Budget 1: bIDEyNOJYTT (Infrastructure)
     {
-        "budgetId": "bIDvWU6mkod",  # Your provided ID
-        "quaterId": "Q1-2023",
+        "quaterId": "Q1-2023-bIDEyNOJYTT",
+        "budgetId": "bIDEyNOJYTT",
+        "name": "Q1 2023 - National Infrastructure",
         "startDate": "2023-01-01",
-        "endDate": "2023-03-31",
-        "others": {
-            "plannedRelease": 1_000_000,  # Matches releaseHistory
-            "actualRelease": 1_000_000,
-            "releaseEvidence": "TR-Q1-EDU-2023.pdf",
-            "notes": "Full release for textbook procurement"
-        }
+        "endDate": "2023-03-31"
     },
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q2-2023",
+        "quaterId": "Q2-2023-bIDEyNOJYTT",
+        "budgetId": "bIDEyNOJYTT",
+        "name": "Q2 2023 - National Infrastructure",
         "startDate": "2023-04-01",
-        "endDate": "2023-06-30",
-        "others": {
-            "plannedRelease": 1_000_000,
-            "actualRelease": 900_000,  # Matches releaseHistory (10% withheld)
-            "releaseEvidence": "TR-Q2-EDU-2023.pdf",
-            "notes": "Withheld 100K pending delivery verification"
-        }
+        "endDate": "2023-06-30"
     },
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q3-2023",
+        "quaterId": "Q3-2023-bIDEyNOJYTT",
+        "budgetId": "bIDEyNOJYTT",
+        "name": "Q3 2023 - National Infrastructure",
         "startDate": "2023-07-01",
-        "endDate": "2023-09-30",
-        "others": {
-            "plannedRelease": 1_000_000,
-            "actualRelease": 700_000,  # Matches releaseHistory
-            "releaseEvidence": "TR-Q3-EDU-2023.pdf",
-            "notes": "Partial release for teacher training"
-        }
+        "endDate": "2023-09-30"
     },
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q4-2023",
+        "quaterId": "Q4-2023-bIDEyNOJYTT",
+        "budgetId": "bIDEyNOJYTT",
+        "name": "Q4 2023 - National Infrastructure",
         "startDate": "2023-10-01",
-        "endDate": "2023-12-31",
-        "others": {
-            "plannedRelease": 800_000,
-            "actualRelease": 300_000,  # Matches releaseHistory
-            "releaseEvidence": "TR-Q4-EDU-2023.pdf",
-            "notes": "Year-end budget cuts applied"
-        }
+        "endDate": "2023-12-31"
+    },
+
+    # Budget 2: bIDuIC1xEeG (Healthcare)
+    {
+        "quaterId": "Q1-2023-bIDuIC1xEeG",
+        "budgetId": "bIDuIC1xEeG",
+        "name": "Q1 2023 - Healthcare Enhancement",
+        "startDate": "2023-01-01",
+        "endDate": "2023-03-31"
+    },
+    {
+        "quaterId": "Q2-2023-bIDuIC1xEeG",
+        "budgetId": "bIDuIC1xEeG",
+        "name": "Q2 2023 - Healthcare Enhancement",
+        "startDate": "2023-04-01",
+        "endDate": "2023-06-30"
+    },
+    {
+        "quaterId": "Q3-2023-bIDuIC1xEeG",
+        "budgetId": "bIDuIC1xEeG",
+        "name": "Q3 2023 - Healthcare Enhancement",
+        "startDate": "2023-07-01",
+        "endDate": "2023-09-30"
+    },
+    {
+        "quaterId": "Q4-2023-bIDuIC1xEeG",
+        "budgetId": "bIDuIC1xEeG",
+        "name": "Q4 2023 - Healthcare Enhancement",
+        "startDate": "2023-10-01",
+        "endDate": "2023-12-31"
+    },
+
+    # Budget 3: bIDQzxZp04C (Education)
+    {
+        "quaterId": "Q1-2023-bIDQzxZp04C",
+        "budgetId": "bIDQzxZp04C",
+        "name": "Q1 2023 - Education Transformation",
+        "startDate": "2023-01-01",
+        "endDate": "2023-03-31"
+    },
+    {
+        "quaterId": "Q2-2023-bIDQzxZp04C",
+        "budgetId": "bIDQzxZp04C",
+        "name": "Q2 2023 - Education Transformation",
+        "startDate": "2023-04-01",
+        "endDate": "2023-06-30"
+    },
+    {
+        "quaterId": "Q3-2023-bIDQzxZp04C",
+        "budgetId": "bIDQzxZp04C",
+        "name": "Q3 2023 - Education Transformation",
+        "startDate": "2023-07-01",
+        "endDate": "2023-09-30"
+    },
+    {
+        "quaterId": "Q4-2023-bIDQzxZp04C",
+        "budgetId": "bIDQzxZp04C",
+        "name": "Q4 2023 - Education Transformation",
+        "startDate": "2023-10-01",
+        "endDate": "2023-12-31"
     }
 ]
-
-disbursements_education = [
-    # Q1 2023 - Textbook Procurement (Full Release)
+disbursements = [
+    # ==================== INFRASTRUCTURE (bIDEyNOJYTT) ====================
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q1-2023",
-        "disbursementDate": "2023-03-12",
-        "amountReleased": 1_000_000,
+        "budgetId": "bIDEyNOJYTT",
+        "quaterId": "Q1-2023-bIDEyNOJYTT",
+        "disbursementDate": "2023-03-10",
+        "amountReleased": 1_200_000_000,
+        "paymentMethod": "Bank Transfer",
+        "disbursementOfficer": "Eng. Robert M. (FIN-WORKS-001)",
+        "department": "Works and Transport",
+        "status": "Completed",
+        "evidence": "VOUCHER-WORKS-Q1-2023.pdf",
+        "others": {
+            "purpose": "Road construction and bridge rehabilitation",
+            "bankRef": "BNK-WORKS-0323",
+            "itemsCovered": ["Road Construction", "Bridge Rehabilitation", "Engineering Surveys"],
+            "supplier": "National Construction Authority"
+        }
+    },
+    {
+        "budgetId": "bIDEyNOJYTT",
+        "quaterId": "Q2-2023-bIDEyNOJYTT",
+        "disbursementDate": "2023-06-15",
+        "amountReleased": 950_000_000,
+        "paymentMethod": "Bank Transfer",
+        "disbursementOfficer": "Eng. Robert M. (FIN-WORKS-001)",
+        "department": "Works and Transport",
+        "status": "Completed",
+        "evidence": "VOUCHER-WORKS-Q2-2023.pdf",
+        "others": {
+            "purpose": "Railway expansion and urban transport projects",
+            "bankRef": "BNK-WORKS-0623",
+            "itemsCovered": ["Railway Expansion", "Urban Light Rail", "Traffic Management Systems"],
+            "supplier": "National Construction Authority"
+        }
+    },
+    {
+        "budgetId": "bIDEyNOJYTT",
+        "quaterId": "Q3-2023-bIDEyNOJYTT",
+        "disbursementDate": "2023-09-12",
+        "amountReleased": 800_000_000,
+        "paymentMethod": "Bank Transfer",
+        "disbursementOfficer": "Eng. Robert M. (FIN-WORKS-001)",
+        "department": "Works and Transport",
+        "status": "Completed",
+        "evidence": "VOUCHER-WORKS-Q3-2023.pdf",
+        "others": {
+            "purpose": "Rural connectivity and port infrastructure",
+            "bankRef": "BNK-WORKS-0923",
+            "itemsCovered": ["Rural Road Connectivity", "Port Dredging", "Public Transport Hubs"],
+            "supplier": "National Construction Authority"
+        }
+    },
+    {
+        "budgetId": "bIDEyNOJYTT",
+        "quaterId": "Q4-2023-bIDEyNOJYTT",
+        "disbursementDate": "2023-12-05",
+        "amountReleased": 650_000_000,
+        "paymentMethod": "Bank Transfer",
+        "disbursementOfficer": "Eng. Robert M. (FIN-WORKS-001)",
+        "department": "Works and Transport",
+        "status": "Completed",
+        "evidence": "VOUCHER-WORKS-Q4-2023.pdf",
+        "others": {
+            "purpose": "Year-end infrastructure completion projects",
+            "bankRef": "BNK-WORKS-1223",
+            "itemsCovered": ["Drainage Systems", "Pedestrian Walkways", "Engineering Surveys"],
+            "supplier": "National Construction Authority"
+        }
+    },
+
+    # ==================== HEALTHCARE (bIDuIC1xEeG) ====================
+    {
+        "budgetId": "bIDuIC1xEeG",
+        "quaterId": "Q1-2023-bIDuIC1xEeG",
+        "disbursementDate": "2023-03-18",
+        "amountReleased": 850_000_000,
         "paymentMethod": "EFT",
-        "disbursementOfficer": "John O. (FIN-EDU-001)",
+        "disbursementOfficer": "Dr. Sarah K. (FIN-HEALTH-001)",
+        "department": "Health",
+        "status": "Completed",
+        "evidence": "VOUCHER-HEALTH-Q1-2023.pdf",
+        "others": {
+            "purpose": "Regional hospitals and vaccine procurement",
+            "bankRef": "BNK-HEALTH-0323",
+            "itemsCovered": ["Regional Hospitals", "Vaccine Procurement", "Medical Equipment"],
+            "supplier": "National Medical Supplies Ltd"
+        }
+    },
+    {
+        "budgetId": "bIDuIC1xEeG",
+        "quaterId": "Q2-2023-bIDuIC1xEeG",
+        "disbursementDate": "2023-06-22",
+        "amountReleased": 750_000_000,
+        "paymentMethod": "EFT",
+        "disbursementOfficer": "Dr. Sarah K. (FIN-HEALTH-001)",
+        "department": "Health",
+        "status": "Completed",
+        "evidence": "VOUCHER-HEALTH-Q2-2023.pdf",
+        "others": {
+            "purpose": "HIV/AIDS programs and health worker training",
+            "bankRef": "BNK-HEALTH-0623",
+            "itemsCovered": ["HIV/AIDS Programs", "Health Worker Training", "Laboratory Reagents"],
+            "supplier": "National Medical Supplies Ltd"
+        }
+    },
+    {
+        "budgetId": "bIDuIC1xEeG",
+        "quaterId": "Q3-2023-bIDuIC1xEeG",
+        "disbursementDate": "2023-09-15",
+        "amountReleased": 700_000_000,
+        "paymentMethod": "EFT",
+        "disbursementOfficer": "Dr. Sarah K. (FIN-HEALTH-001)",
+        "department": "Health",
+        "status": "Completed",
+        "evidence": "VOUCHER-HEALTH-Q3-2023.pdf",
+        "others": {
+            "purpose": "Malaria control and maternal health services",
+            "bankRef": "BNK-HEALTH-0923",
+            "itemsCovered": ["Malaria Control", "Maternal Health", "Surgical Supplies"],
+            "supplier": "National Medical Supplies Ltd"
+        }
+    },
+    {
+        "budgetId": "bIDuIC1xEeG",
+        "quaterId": "Q4-2023-bIDuIC1xEeG",
+        "disbursementDate": "2023-12-08",
+        "amountReleased": 600_000_000,
+        "paymentMethod": "EFT",
+        "disbursementOfficer": "Dr. Sarah K. (FIN-HEALTH-001)",
+        "department": "Health",
+        "status": "Completed",
+        "evidence": "VOUCHER-HEALTH-Q4-2023.pdf",
+        "others": {
+            "purpose": "Ambulance fleet and mental health services",
+            "bankRef": "BNK-HEALTH-1223",
+            "itemsCovered": ["Ambulance Fleet", "Mental Health Services", "Health IT Systems"],
+            "supplier": "National Medical Supplies Ltd"
+        }
+    },
+
+    # ==================== EDUCATION (bIDQzxZp04C) ====================
+    {
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q1-2023-bIDQzxZp04C",
+        "disbursementDate": "2023-03-12",
+        "amountReleased": 700_000_000,
+        "paymentMethod": "Cheque",
+        "disbursementOfficer": "Prof. James L. (FIN-EDU-001)",
         "department": "Education",
         "status": "Completed",
         "evidence": "VOUCHER-EDU-Q1-2023.pdf",
         "others": {
-            "purpose": "Textbook printing and distribution",
+            "purpose": "Classroom construction and teacher recruitment",
             "bankRef": "BNK-EDU-0323",
-            "itemsCovered": ["Textbooks"],
-            "supplier": "National Printing Press"
+            "itemsCovered": ["Classroom Construction", "Teacher Recruitment", "Textbook Provision"],
+            "supplier": "National Education Services"
         }
     },
-    # Q2 2023 - Science Kits (Partial Release)
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q2-2023",
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q2-2023-bIDQzxZp04C",
         "disbursementDate": "2023-06-18",
-        "amountReleased": 900_000,
+        "amountReleased": 650_000_000,
         "paymentMethod": "Cheque",
-        "disbursementOfficer": "Sarah M. (FIN-EDU-002)",
+        "disbursementOfficer": "Prof. James L. (FIN-EDU-001)",
         "department": "Education",
         "status": "Completed",
         "evidence": "VOUCHER-EDU-Q2-2023.pdf",
         "others": {
-            "purpose": "Science lab equipment for 150 schools",
-            "chequeNo": "CHQ-EDU-456789",
-            "itemsCovered": ["Science Kits"],
-            "withheldAmount": 100_000,
-            "withheldReason": "Pending delivery verification"
+            "purpose": "STEM equipment and vocational training",
+            "bankRef": "BNK-EDU-0623",
+            "itemsCovered": ["STEM Equipment", "Vocational Training", "Science Labs"],
+            "supplier": "National Education Services"
         }
     },
-    # Q3 2023 - Teacher Training (Partial Release)
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q3-2023",
-        "disbursementDate": "2023-09-08",
-        "amountReleased": 700_000,
-        "paymentMethod": "Mobile Money",
-        "disbursementOfficer": "David K. (FIN-EDU-003)",
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q3-2023-bIDQzxZp04C",
+        "disbursementDate": "2023-09-20",
+        "amountReleased": 600_000_000,
+        "paymentMethod": "Cheque",
+        "disbursementOfficer": "Prof. James L. (FIN-EDU-001)",
         "department": "Education",
         "status": "Completed",
         "evidence": "VOUCHER-EDU-Q3-2023.pdf",
         "others": {
-            "purpose": "Teacher training workshops",
-            "mobileRef": "MM-EDU-789123",
-            "itemsCovered": ["Teacher Training"],
-            "beneficiaries": ["Teachers College A", "Teachers College B"],
-            "attendees": 75
+            "purpose": "Digital learning and special needs education",
+            "bankRef": "BNK-EDU-0923",
+            "itemsCovered": ["Digital Learning", "Special Needs Education", "Sports Facilities"],
+            "supplier": "National Education Services"
         }
     },
-    # Q4 2023 - Final Partial Release
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q4-2023",
-        "disbursementDate": "2023-12-03",
-        "amountReleased": 300_000,
-        "paymentMethod": "Wire Transfer",
-        "disbursementOfficer": "Grace L. (FIN-EDU-004)",
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q4-2023-bIDQzxZp04C",
+        "disbursementDate": "2023-12-10",
+        "amountReleased": 500_000_000,
+        "paymentMethod": "Cheque",
+        "disbursementOfficer": "Prof. James L. (FIN-EDU-001)",
         "department": "Education",
-        "status": "Pending",
+        "status": "Completed",
         "evidence": "VOUCHER-EDU-Q4-2023.pdf",
         "others": {
-            "purpose": "School maintenance grants",
-            "swiftCode": "UGEDUGKA",
-            "itemsCovered": ["Textbooks", "Science Kits"],
-            "notes": "Reduced due to budget cuts"
+            "purpose": "Teacher housing and university research grants",
+            "bankRef": "BNK-EDU-1223",
+            "itemsCovered": ["Teacher Housing", "University Research Grants", "School Feeding"],
+            "supplier": "National Education Services"
         }
     }
 ]
+education_expenditures = [
+    # Q1
+    {
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q1-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-03-18",
+        "amountSpent": 650_000_000,
+        "beneficially": "School Construction Unit",
+        "description": "New classroom construction",
+        "evidence": "EXP-EDU-Q1-001",
+        "detailsOfExpense": {
+            "items": ["Cement", "Roofing Sheets", "Windows"],
+            "quantity": [10000, 5000, 2000],
+            "amount": [15000, 25000, 12000],
+            "categories": ["Infrastructure", "Infrastructure", "Infrastructure"],
+            "supplier": "National Builders Ltd",
+            "evidence": "EXP-EDU-Q1-001"
+        }
+    },
+    {
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q1-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-03-29",
+        "amountSpent": 600_000_000,
+        "beneficially": "Teacher Service Commission",
+        "description": "Teacher recruitment drive",
+        "evidence": "EXP-EDU-Q1-002",
+        "detailsOfExpense": {
+            "items": ["Teacher Salaries", "Training Workshops"],
+            "quantity": [500, 25],
+            "amount": [1000000, 4000000],
+            "categories": ["Human Resources", "Human Resources"],
+            "supplier": "Teacher Service Commission",
+            "evidence": "EXP-EDU-Q1-002"
+        }
+    },
 
-expenditures_education = [
-    # Q1 2023 - Textbook Distribution (Materials)
+    # Q2
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q1-2023",
-        "dateOfExpense": "2023-03-25",
-        "amountSpent": 950_000,
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q2-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-06-12",
+        "amountSpent": 620_000_000,
+        "beneficially": "STEM Education Initiative",
+        "description": "Science lab equipment",
+        "evidence": "EXP-EDU-Q2-001",
         "detailsOfExpense": {
-            "items": ["Primary Math Text", "Science Readers"],  # Names can vary
-            "quantity": [40000, 10000],  # Total 50,000 books (matches budget)
-            "amount": [20, 15],  # Unit prices (different from budget is okay)
-            "categories": ["Materials", "Materials"]  # Must match budget
-        },
-        "beneficially": "District Schools Board",
-        "description": "Q1 Textbook distribution to 120 schools",
-        "evidence": "EXP-EDU-Q1-2023.pdf",
-        "others": {
-            "disbursementRef": "dIDeduQ1",  # Link to Q1 disbursement
-            "schoolsCovered": 120,
-            "deliveryNote": "DN-EDU-0325"
+            "items": ["Microscopes", "Chemistry Sets"],
+            "quantity": [500, 800],
+            "amount": [120000, 350000],
+            "categories": ["STEM Education", "STEM Education"],
+            "supplier": "Science Equipment Ltd",
+            "evidence": "EXP-EDU-Q2-001"
         }
     },
-    # Q2 2023 - Science Equipment (Equipment)
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q2-2023",
-        "dateOfExpense": "2023-06-30",
-        "amountSpent": 850_000,
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q2-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-06-28",
+        "amountSpent": 580_000_000,
+        "beneficially": "Vocational Training Board",
+        "description": "Technical skills equipment",
+        "evidence": "EXP-EDU-Q2-002",
         "detailsOfExpense": {
-            "items": ["Chemistry Sets", "Physics Lab Kits"],
-            "quantity": [100, 50],  # Total 150 kits (matches Q2 target)
-            "amount": [5000, 7000],
-            "categories": ["Equipment", "Equipment"]  # Consistent
-        },
-        "beneficially": "Science Teachers Association",
-        "description": "Lab equipment for 150 schools",
-        "evidence": "EXP-EDU-Q2-2023.pdf",
-        "others": {
-            "disbursementRef": "dIDeduQ2",
-            "warrantyPeriod": "2 years"
+            "items": ["Welding Machines", "Carpentry Tools"],
+            "quantity": [120, 250],
+            "amount": [2500000, 1000000],
+            "categories": ["Skills Development", "Skills Development"],
+            "supplier": "Technical Skills Ltd",
+            "evidence": "EXP-EDU-Q2-002"
         }
     },
-    # Q3 2023 - Teacher Workshops (Training)
+
+    # Q3
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q3-2023",
-        "dateOfExpense": "2023-09-20",
-        "amountSpent": 650_000,
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q3-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-09-15",
+        "amountSpent": 550_000_000,
+        "beneficially": "Digital Learning Program",
+        "description": "ICT equipment for schools",
+        "evidence": "EXP-EDU-Q3-001",
         "detailsOfExpense": {
-            "items": ["Pedagogy Training", "STEM Workshops"],
-            "quantity": [70, 5],  # 70 teachers, 5 workshop sessions
-            "amount": [8000, 18000],
-            "categories": ["Training", "Training"]  # As per budget
-        },
-        "beneficially": "National Teachers Union",
-        "description": "Q3 Professional development",
-        "evidence": "EXP-EDU-Q3-2023.pdf",
-        "others": {
-            "disbursementRef": "dIDeduQ3",
-            "trainers": ["Dr. Smith", "Prof. Johnson"]
+            "items": ["Laptops", "Projectors"],
+            "quantity": [5000, 1200],
+            "amount": [80000, 25000],
+            "categories": ["ICT in Education", "ICT in Education"],
+            "supplier": "Digital Learning Solutions",
+            "evidence": "EXP-EDU-Q3-001"
         }
     },
-    # Q4 2023 - Final Expenditures
     {
-        "budgetId": "bIDvWU6mkod",
-        "quaterId": "Q4-2023",
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q3-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-09-30",
+        "amountSpent": 500_000_000,
+        "beneficially": "Special Needs Education",
+        "description": "Inclusive education materials",
+        "evidence": "EXP-EDU-Q3-002",
+        "detailsOfExpense": {
+            "items": ["Braille Printers", "Hearing Aids"],
+            "quantity": [50, 500],
+            "amount": [5000000, 500000],
+            "categories": ["Inclusive Education", "Inclusive Education"],
+            "supplier": "Accessible Learning Ltd",
+            "evidence": "EXP-EDU-Q3-002"
+        }
+    },
+
+    # Q4
+    {
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q4-2023-bIDQzxZp04C",
         "dateOfExpense": "2023-12-15",
-        "amountSpent": 250_000,
+        "amountSpent": 480_000_000,
+        "beneficially": "University Grants Committee",
+        "description": "Research funding",
+        "evidence": "EXP-EDU-Q4-001",
         "detailsOfExpense": {
-            "items": ["Repaired Textbooks", "Lab Consumables"],
-            "quantity": [5000, 200],
-            "amount": [30, 500],
-            "categories": ["Materials", "Equipment"]  # Mixed but valid
-        },
-        "beneficially": "Vocational Schools",
-        "description": "Year-end maintenance and supplies",
-        "evidence": "EXP-EDU-Q4-2023.pdf",
-        "others": {
-            "disbursementRef": "dIDeduQ4",
-            "emergencyAllocation": True
+            "items": ["Lab Equipment", "Research Stipends"],
+            "quantity": [45, 120],
+            "amount": [6000000, 1500000],
+            "categories": ["Research Development", "Research Development"],
+            "supplier": "National Research Council",
+            "evidence": "EXP-EDU-Q4-001"
+        }
+    },
+    {
+        "budgetId": "bIDQzxZp04C",
+        "quaterId": "Q4-2023-bIDQzxZp04C",
+        "dateOfExpense": "2023-12-28",
+        "amountSpent": 450_000_000,
+        "beneficially": "School Feeding Program",
+        "description": "Nutrition supplies",
+        "evidence": "EXP-EDU-Q4-002",
+        "detailsOfExpense": {
+            "items": ["Fortified Meals", "Milk Packets"],
+            "quantity": [3000000, 5000000],
+            "amount": [100, 30],
+            "categories": ["Nutrition", "Nutrition"],
+            "supplier": "National Food Suppliers",
+            "evidence": "EXP-EDU-Q4-002"
         }
     }
 ]
@@ -512,16 +598,18 @@ def plot_quarterly_pies_detailed(budgetId: str, output_dir: str):
 if __name__ == "__main__":
     
     # pprint.pprint(budgetQuaterPerformance("bIDziMnNLhw"))
-    # for quater in expenditures_education:
-        # print(db.insertDataIntoExpenditure(quater))
+    # for quater in education_expenditures:
+    #     print(db.insertDataIntoExpenditure(quater))
+
+# my stress test is on these bIDEyNOJYTT,bIDuIC1xEeG,bIDQzxZp04C
     # pprint.pprint(db.getExpendituresByBudgetQuarter("bIDvWU6mkod","qId7MFFvF"))
     # pprint.pprint(db.getQuartersByBudgetId('bIDvWU6mkod'))
     
     # pprint.pprint(db.getAnyTableData({
     #     'tableName': 'budget',
     #     'columns': ['*'],
-    #     'condition': 'budgetId = ?',
-    #     'conditionalData': ["bIDvWU6mkod"],
+    #     'condition': '',
+    #     'conditionalData': [],
     #     'limit':100,
     #     'returnDicts': True,
     #     'returnNamespaces': False,
@@ -529,8 +617,8 @@ if __name__ == "__main__":
     #     'returnGenerator': False 
         
     # })    )
-    metrics = utils.getQuarterlyPerfromanceMetric('bIDziMnNLhw')
+    # metrics = utils.getQuarterlyPerfromanceMetric('bIDc99CtOVM')
     # plot_quarterly_pies_detailed('bIDvWU6mkod','/workspaces/budgetMornitoringSystem/budgetMonitoring/database')
-    pprint.pprint(metrics)
+    # pprint.pprint(metrics)
     # print(plot_quarterly_activities(metrics,save_path='quarterly_performance.png'))
-        # pass
+        pass
