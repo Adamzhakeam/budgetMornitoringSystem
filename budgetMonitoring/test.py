@@ -606,23 +606,23 @@ if __name__ == "__main__":
     # pprint.pprint(db.getExpendituresByBudgetQuarter("bIDvWU6mkod","qId7MFFvF"))
     # pprint.pprint(db.getQuartersByBudgetId('bIDvWU6mkod'))
     
-    # pprint.pprint(db.getAnyTableData({
-    #     'tableName': 'budgetQuaters',
-    #     'columns': ['*'],
-    #     'condition': 'budgetId = ?',
-    #     'conditionalData': ['bIDvWU6mkod'],
-    #     'limit':4,
-    #     'returnDicts': True,
-    #     'returnNamespaces': False,
-    #     'parseJson': True,
-    #     'returnGenerator': False 
+    pprint.pprint(db.getAnyTableData({
+        'tableName': 'budgetQuaters',
+        'columns': ['*'],
+        'condition': 'budgetId = ?',
+        'conditionalData': ['bIDvWU6mkod'],
+        'limit':4,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False 
         
-    # })    )
+    })    )
     # metrics = utils.getQuarterlyPerfromanceMetric('bIDc99CtOVM')
     # pprint.pprint(metrics)
     # plot_quarterly_pies_detailed('bIDvWU6mkod','/workspaces/budgetMornitoringSystem/budgetMonitoring/database')
     # pprint.pprint(metrics)
     # print(plot_quarterly_activities(metrics,save_path='quarterly_performance.png'))
-    pprint.pprint(utils.getSingleQuarterlyPerfromanceMetric('bIDvWU6mkod','2023-12'))
+    # pprint.pprint(utils.getSingleQuarterlyPerfromanceMetric('bIDvWU6mkod','2023-12'))
     # pprint.pprint(getExpendituresForQuarter('bIDvWU6mkod',['qId7MFFvF','qId5oWgiM','qIdEpyBsG','qIdlQOABx'],'2023-12'))
         # pass
