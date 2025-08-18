@@ -125,6 +125,28 @@ def handleQuarterMetrics():
          metrics = getQuarterlyPerfromanceMetric(payload['budgetId'])
          return metrics 
      
+@app.route('/getSingleQuarterMetrics',methods=['POST'])
+def handleSingleQuarterMetrics():
+    from utils import getQuarterlyPerfromanceMetric
+    
+    payload = request.get_json()
+    payloadStructure = {
+        'budgetId' : kutils.config.getValue('bbmsDb/budgetId'),
+        'quaterMonthDate':kutils.config.getValue('bbmsDb/quaterMonthDate')
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    
+    if validationResponse['status']:
+         for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+                
+         metrics = getQuarterlyPerfromanceMetric(payload['budgetId'])
+         return metrics 
+
      
 @app.route('/adduser',methods=['POST'])
 # @role_required(['MANAGER'])
@@ -197,6 +219,7 @@ def init():
             'role':str,
             'others':dict,
             'budgetId':str,
+            'quaterMonthDate':str,
             'SECRETE_KEY':kutils.codes.new(),
             'SESSION_TYPE':'filesystem',
             'SESSION_PERMANENT':False,

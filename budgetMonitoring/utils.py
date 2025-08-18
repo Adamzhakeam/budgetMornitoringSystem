@@ -255,4 +255,181 @@ def calculateCategoryPerformance(planned_items: dict,
     
     return category_metrics
 
+def getSingleQuarterlyPerfromanceMetric(budgetId: str, date: str) -> dict:
+    """
+    Returns performance metrics with category-based analysis and item-level details.
+    Processes ALL quarters. If ALL quarters' expenditures return status=False,
+    returns the first failed response. Otherwise returns the results for the
+    successful quarters (and lists the failed ones).
+    """
+    # Get all quarters
+    quarters_res = db.getQuartersByBudgetId(budgetId)
+    if not quarters_res['status']:
+        return {"status": False, "error": quarters_res['log']}
+
+    # Get planned items and categories from original budget
+    budget = db.getPalnnedByBudgetId(budgetId)
+    if not budget.get('status'):
+        return {"status": False, "error": "Budget not found"}
+
+    planned_items, planned_categories = extractPlaanedData(budget['data'][0])
+    planned_total = sum(planned_items.values())
+
+    results = {}
+    any_success = False
+    first_fail_response = None
+    failed_quarters = []
+
+    for quarter in quarters_res['data']:
+        quarter_id = quarter['quaterId']
+
+        # Get expenditures for this quarter/month
+        expenditures = getExpendituresForSingleQuarter(budgetId, quarter_id, date)
+
+        # If this quarter failed, remember the first failure and continue
+        if not expenditures or not expenditures.get("status"):
+            if first_fail_response is None:
+                first_fail_response = expenditures or {
+                    "status": False,
+                    "log": "Unknown error from expenditures"
+                }
+            failed_quarters.append(quarter_id)
+            continue
+
+        # This quarter succeeded
+        any_success = True
+
+        # Get disbursements for this quarter
+        print('>>>appended qid>>>',quarter_id)
+        disbursements = getDisbursementsForQuarter(budgetId, quarter_id)
+
+        # Calculate metrics
+        results[quarter_id] = {
+            "financial": calculateFinancialMetrics(
+                planned=planned_total,
+                disbursed=disbursements.get('total', 0.0),
+                expended=expenditures.get('total', 0.0),
+                items=expenditures.get('items', [])
+            ),
+            "category_analysis": calculateCategoryPerformance(
+                planned_items,
+                planned_categories,
+                expenditures.get('item_details', {})
+            ),
+            "budget_health": calculateUtilisation(
+                disbursements.get('total', 0.0),
+                expenditures.get('total', 0.0)
+            )
+        }
+
+    # If no quarter succeeded, return the first failure response
+    if not any_success:
+        return first_fail_response if first_fail_response else {
+            "status": False,
+            "log": "No expenditure data found for any quarter"
+        }
+
+    return {
+        "status": True,
+        "results": results,
+        "failed_quarters": failed_quarters
+    }
+
+# other helper functions 
+def getExpendituresForSingleQuarter(budgetId: str, quarterIds, date: str) -> dict:
+    """
+    Accepts either a single quarterId (str) or a list of quarterIds.
+    Tries each quarter until a successful response is found.
+    If all fail, returns the first failed response.
+    """
+    if isinstance(quarterIds, str):
+        quarterIds = [quarterIds]  # wrap single id into a list
+    
+    first_fail_response = None
+
+    for qid in quarterIds:
+        res = getExpendituresByBudgetQuarterDate(budgetId, qid, date)
+
+        # If failed, store first fail and continue
+        if not res.get('status'):
+            if first_fail_response is None:
+                first_fail_response = res
+            continue
+
+        # ✅ Process successful quarter data
+        all_amounts = []
+        item_details = {}
+
+        for record in res.get('data', []):
+            details = record.get('detailsOfexpense', {})
+            items = details.get('items', [])
+            quantities = details.get('quantity', [])
+            amounts = details.get('amount', [])
+            categories = details.get('categories', [])
+
+            for i, item in enumerate(items):
+                # Safety: avoid IndexError if lists mismatch
+                q = quantities[i] if i < len(quantities) else 0
+                a = amounts[i] if i < len(amounts) else 0
+                c = categories[i] if i < len(categories) else None
+
+                amount = q * a
+                all_amounts.append(amount)
+
+                item_details[item] = {
+                    'amount': amount,
+                    'category': c,
+                    'quantity': q,
+                    'unit_price': a
+                }
+
+        return {'status':True,
+            'total': sum(all_amounts),
+            'items': all_amounts,
+            'item_details': item_details,
+            'quarterId': qid
+        }
+
+    # ❌ All quarters failed
+    return first_fail_response if first_fail_response else {
+        'status': False,
+        'message': 'No data found for given quarters'
+    }
+
+def getExpendituresByBudgetQuarterDate(budgetId: str, quaterId: str, date: str) -> dict:
+    """
+    Retrieves all expenditures for a specific budget, quarter, and month.
+
+    Args:
+        budgetId (str): The budget ID to filter expenditures.
+        quaterId (str): The quarter ID to filter expenditures.
+        date (str): The year-month to filter expenditures (format: yyyy-mm).
+
+    Returns:
+        dict: {
+            'status': bool,
+            'data': list[dict] if status=True,
+            'log': str if status=False
+        }
+    """
+
+    # Ensure the date format is yyyy-mm
+    if len(date) != 7 or date[4] != '-':
+        return {
+            'status': False,
+            'log': "Invalid date format. Please use yyyy-mm."
+        }
+
+    return db.getAnyTableData({
+        'tableName': 'expenditure',
+        'columns': ['*'],
+        'condition': 'budgetId = ? AND quaterId = ? AND dateOfExpense LIKE ?',
+        'conditionalData': [budgetId, quaterId, f"{date}-%"],  # Matches yyyy-mm-dd
+        'limit': 100,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False
+    })
+
 

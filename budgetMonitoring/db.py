@@ -546,6 +546,34 @@ def getExpendituresByBudgetQuarter(budgetId: str, quaterId: str) -> dict:
         'parseJson': True,
         'returnGenerator': False 
     })
+    
+def getExpendituresByBudgetQuarterDate(budgetId: str, quaterId: str,date:str) -> dict:
+    """
+    Retrieves all expenditures for a specific budget and quarter
+    
+    Args:
+        budgetId (str): The budget ID to filter expenditures
+        quaterId (str): The quarter ID to filter expenditures
+        
+    Returns:
+        dict: {
+            'status': bool, 
+            'data': list[dict] if status=True, 
+            'log': str if status=False
+        }
+    """
+    return getAnyTableData({
+        'tableName': 'expenditure',
+        'columns': ['*'],
+        'condition': 'budgetId = ? AND quaterId = ?',
+        'conditionalData': [budgetId, quaterId],
+        'limit':100,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False 
+    })
+
 # the modules below are responsible for performance table logic 
 def insertDataIntoPerformance(performanceDetails: dict) -> dict:
     '''
