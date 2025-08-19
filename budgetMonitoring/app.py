@@ -132,7 +132,7 @@ def handleSingleQuarterMetrics():
     payload = request.get_json()
     payloadStructure = {
         'budgetId' : kutils.config.getValue('bbmsDb/budgetId'),
-        'quaterMonthDate':kutils.config.getValue('bbmsDb/quaterMonthDate')
+        # 'quaterMonthDate':kutils.config.getValue('bbmsDb/quaterMonthDate')
     }
     validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
     

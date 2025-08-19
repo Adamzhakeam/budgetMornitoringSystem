@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Time Series Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .input-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 200px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3a7bd5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            align-self: flex-end;
+            height: 40px;
+        }
+        button:hover {
+            background-color: #2c65c0;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .card-title {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .metric {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .metric-label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .positive {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .negative {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .comparison-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        .date-dropdowns {
+            display: flex;
+            gap: 15px;
+        }
+        .quarter-highlight {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .quarter-highlight h3 {
+            margin-top: 0;
+            color: #3a7bd5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Budget Time Series Analysis</h1>
+        <div class="input-container">
+            <div class="input-group">
+                <label for="budgetId">Budget ID</label>
+                <input type="text" id="budgetId" placeholder="Enter Budget ID" value="BGT-2023">
+            </div>
+            <div class="date-dropdowns">
+                <div class="input-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" value="2023-01-01">
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" value="2023-12-31">
+                </div>
+            </div>
+            <button onclick="fetchBudgetData()">Generate Report</button>
+        </div>
+    </div>
+    <div id="dashboard" class="dashboard">
+        <div class="loading" id="loadingMessage">Enter budget ID and date range to generate report</div>
+    </div>
+
+    <script>
+        // Register plugins
+        Chart.register(ChartDataLabels);
+        
+        // Store the budget data
+        let budgetData = null;
+        let currentBudgetId = null;
+        
+        // Helper function to format currency
+        function formatCurrency(value) {
+            if (value === undefined || value === null) return 'UGX 0';
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'UGX',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+        
+        // Helper function to show error messages
+        function showError(message) {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+        
+        // Fetch all quarter data for a budget
+        async function fetchBudgetData() {
+            const budgetId = document.getElementById('budgetId').value.trim();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // Validate inputs
+            if (!budgetId) {
+                showError("Please enter a budget ID.");
+                return;
+            }
+            
+            if (!startDate || !endDate) {
+                showError("Please select both start and end dates.");
+                return;
+            }
+            
+            currentBudgetId = budgetId;
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '<div class="loading">Loading budget data...</div>';
+            
+            try {
+                // Simulate API call with demo data
+                budgetData = generateDemoData();
+                
+                // Process the data and render the chart
+                processAndRenderChart(startDate, endDate);
+            } catch (error) {
+                console.error("Error fetching budget data:", error);
+                showError(`Failed to fetch data: ${error.message}`);
+            }
+        }
+        
+        // Process the data and render the chart based on selected date range
+        function processAndRenderChart(startDate, endDate) {
+            if (!budgetData) {
+                showError("No budget data available.");
+                return;
+            }
+            
+            // Convert input dates to Date objects for comparison
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+            
+            // Filter quarters that fall within the selected date range
+            const quartersInRange = [];
+            let allDates = [];
+            let allAmounts = [];
+            let quarterInfo = {};
+            
+            for (const [qId, qData] of Object.entries(budgetData)) {
+                const quarterStart = new Date(qData.quarterStartDate);
+                const quarterEnd = new Date(qData.quarterEndDate);
+                
+                // Check if quarter overlaps with selected date range
+                if ((quarterStart <= endDateObj && quarterEnd >= startDateObj)) {
+                    // Create quarter label
+                    const quarterLabel = `${qData.quarterStartDate} to ${qData.quarterEndDate}`;
+                    
+                    // Add to quartersInRange with proper labels
+                    quartersInRange.push({
+                        id: qId,
+                        data: qData,
+                        startDate: qData.quarterStartDate,
+                        endDate: qData.quarterEndDate,
+                        quarterLabel: quarterLabel
+                    });
+                    
+                    // Process dates and amounts for this quarter
+                    qData.datesOfExpense.forEach((date, index) => {
+                        const expenseDate = new Date(date);
+                        if (expenseDate >= startDateObj && expenseDate <= endDateObj) {
+                            allDates.push(date);
+                            allAmounts.push(qData.amountsSpent[index]);
+                            quarterInfo[date] = { 
+                                quarterId: qId, 
+                                quarterLabel: quarterLabel 
+                            };
+                        }
+                    });
+                }
+            }
+            
+            if (quartersInRange.length === 0) {
+                showError("No quarters found within the selected date range.");
+                return;
+            }
+            
+            // Sort dates chronologically
+            const sortedIndices = allDates
+                .map((date, index) => ({ date, index }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .map(item => item.index);
+                
+            const sortedDates = sortedIndices.map(i => allDates[i]);
+            const sortedAmounts = sortedIndices.map(i => allAmounts[i]);
+            
+            // Prepare quarter labels for each data point
+            const quarterLabels = sortedDates.map(date => quarterInfo[date].quarterLabel);
+            const quarterIds = sortedDates.map(date => quarterInfo[date].quarterId);
+            
+            // Get unique quarter labels for legend
+            const uniqueQuarterLabels = [...new Set(quarterLabels)];
+            
+            // Render the chart
+            renderTimeSeriesChart(sortedDates, sortedAmounts, quarterLabels, quarterIds, uniqueQuarterLabels, quartersInRange);
+            
+            // Render metrics and category comparison
+            renderMetricsAndComparison(quartersInRange);
+        }
+        
+        // Render the time series chart
+        function renderTimeSeriesChart(dates, amounts, quarterLabels, quarterIds, uniqueQuarterLabels, quartersInRange) {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '';
+            
+            // Create main card
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // Card header
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header';
+            cardHeader.innerHTML = `
+                <h2 class="card-title">Budget Time Series Analysis</h2>
+                <div>${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}</div>
+            `;
+            card.appendChild(cardHeader);
+            
+            // Quarter highlights
+            const highlightSection = document.createElement('div');
+            highlightSection.className = 'quarter-highlight';
+            highlightSection.innerHTML = `
+                <h3>Quarters in Selected Range:</h3>
+                <div>${uniqueQuarterLabels.join(', ')}</div>
+            `;
+            card.appendChild(highlightSection);
+            
+            // Create chart container
+            const chartContainer = document.createElement('div');
+            chartContainer.className = 'chart-container';
+            const chartCanvas = document.createElement('canvas');
+            chartCanvas.id = 'time-series-chart';
+            chartContainer.appendChild(chartCanvas);
+            card.appendChild(chartContainer);
+            
+            dashboard.appendChild(card);
+            
+            // Create chart
+            const ctx = document.getElementById('time-series-chart').getContext('2d');
+            
+            // Generate distinct colors for each quarter
+            const colors = [
+                '#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2',
+                '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'
+            ];
+            
+            // Create a dataset for each unique quarter
+            const datasets = uniqueQuarterLabels.map((label, index) => {
+                const color = colors[index % colors.length];
+                return {
+                    label: label,
+                    data: dates.map((date, i) => {
+                        return quarterLabels[i] === label ? amounts[i] : null;
+                    }),
+                    backgroundColor: color + '40', // Add opacity
+                    borderColor: color,
+                    borderWidth: 2,
+                    pointBackgroundColor: color,
+                    pointRadius: 5,
+                    tension: 0.1
+                };
+            });
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Amount (UGX)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date of Expense'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.raw || 0;
+                                    return `${label}: ${formatCurrency(value)}`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Render metrics and category comparison
+        function renderMetricsAndComparison(quartersInRange) {
+            const dashboard = document.getElementById('dashboard');
+            
+            // Calculate totals across all quarters in range
+            let totalPlanned = 0;
+            let totalExpended = 0;
+            const categoryAnalysis = {};
+            
+            quartersInRange.forEach(quarter => {
+                const qData = quarter.data;
+                totalPlanned += qData.financial.planned || 0;
+                totalExpended += qData.financial.expended || 0;
+                
+                // Aggregate category data
+                for (const [category, data] of Object.entries(qData.category_analysis || {})) {
+                    if (!categoryAnalysis[category]) {
+                        categoryAnalysis[category] = { actual: 0, planned: 0 };
+                    }
+                    categoryAnalysis[category].actual += data.actual || 0;
+                    categoryAnalysis[category].planned += data.planned || 0;
+                }
+            });
+            
+            // Calculate utilization percentage
+            const utilizationPercentage = totalPlanned > 0 ? (totalExpended / totalPlanned) * 100 : 0;
+            
+            // Calculate variance
+            const variance = totalPlanned - totalExpended;
+            
+            // Create metrics card
+            const metricsCard = document.createElement('div');
+            metricsCard.className = 'card';
+            
+            const metricsGrid = document.createElement('div');
+            metricsGrid.className = 'metrics-grid';
+            metricsGrid.innerHTML = `
+                <div class="metric">
+                    <div class="metric-label">Total Planned</div>
+                    <div class="metric-value">${formatCurrency(totalPlanned)}</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Expended</div>
+                    <div class="metric-value">${formatCurrency(totalExpended)}</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Utilization</div>
+                    <div class="metric-value">
+                        ${utilizationPercentage.toFixed(2)}%
+                        <span class="badge ${utilizationPercentage > 90 ? 'negative' : 'positive'}">
+                            ${utilizationPercentage > 90 ? 'Over' : 'Under'} Budget
+                        </span>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Variance</div>
+                    <div class="metric-value">
+                        ${formatCurrency(variance)}
+                        <span class="badge ${variance < 0 ? 'negative' : 'positive'}">
+                            ${variance < 0 ? 'Overspent' : 'Under Budget'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            metricsCard.appendChild(metricsGrid);
+            dashboard.appendChild(metricsCard);
+            
+            // Create category comparison table if we have category data
+            if (Object.keys(categoryAnalysis).length > 0) {
+                const comparisonCard = document.createElement('div');
+                comparisonCard.className = 'card';
+                comparisonCard.innerHTML = '<h2 class="card-title">Category Analysis</h2>';
+                
+                const table = document.createElement('table');
+                table.className = 'comparison-table';
+                
+                // Table header
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th>Category</th>
+                        <th>Planned</th>
+                        <th>Actual</th>
+                        <th>Variance</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+                
+                // Table body
+                const tbody = document.createElement('tbody');
+                for (const [category, data] of Object.entries(categoryAnalysis)) {
+                    const variance = data.planned - data.actual;
+                    const varianceClass = variance >= 0 ? 'positive' : 'negative';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${category}</td>
+                        <td>${formatCurrency(data.planned)}</td>
+                        <td>${formatCurrency(data.actual)}</td>
+                        <td><span class="badge ${varianceClass}">${formatCurrency(variance)}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                }
+                
+                table.appendChild(tbody);
+                comparisonCard.appendChild(table);
+                dashboard.appendChild(comparisonCard);
+            }
+        }
+        
+        // Generate demo data for testing
+        function generateDemoData() {
+            return {
+                "Q1-2023": {
+                    "quarterStartDate": "2023-01-01",
+                    "quarterEndDate": "2023-03-31",
+                    "financial": {
+                        "planned": 15000000,
+                        "expended": 14200000,
+                        "balance": 800000
+                    },
+                    "datesOfExpense": [
+                        "2023-01-15", "2023-02-10", "2023-03-05", 
+                        "2023-03-20", "2023-03-25"
+                    ],
+                    "amountsSpent": [
+                        3000000, 4500000, 2500000, 3200000, 1000000
+                    ],
+                    "category_analysis": {
+                        "Salaries": { "planned": 8000000, "actual": 7800000 },
+                        "Equipment": { "planned": 3000000, "actual": 3200000 },
+                        "Travel": { "planned": 2000000, "actual": 1800000 },
+                        "Training": { "planned": 2000000, "actual": 1400000 }
+                    }
+                },
+                "Q2-2023": {
+                    "quarterStartDate": "2023-04-01",
+                    "quarterEndDate": "2023-06-30",
+                    "financial": {
+                        "planned": 18000000,
+                        "expended": 19000000,
+                        "balance": -1000000
+                    },
+                    "datesOfExpense": [
+                        "2023-04-12", "2023-05-03", "2023-05-18", 
+                        "2023-06-10", "2023-06-22"
+                    ],
+                    "amountsSpent": [
+                        4200000, 3800000, 4500000, 3500000, 3000000
+                    ],
+                    "category_analysis": {
+                        "Salaries": { "planned": 8500000, "actual": 8500000 },
+                        "Equipment": { "planned": 4000000, "actual": 4500000 },
+                        "Travel": { "planned": 2500000, "actual": 3000000 },
+                        "Training": { "planned": 3000000, "actual": 3000000 }
+                    }
+                },
+                "Q3-2023": {
+                    "quarterStartDate": "2023-07-01",
+                    "quarterEndDate": "2023-09-30",
+                    "financial": {
+                        "planned": 17000000,
+                        "expended": 15500000,
+                        "balance": 1500000
+                    },
+                    "datesOfExpense": [
+                        "2023-07-08", "2023-08-15", "2023-09-01", 
+                        "2023-09-15", "2023-09-28"
+                    ],
+                    "amountsSpent": [
+                        2800000, 3200000, 3500000, 3000000, 3000000
+                    ],
+                    "category_analysis": {
+                        "Salaries": { "planned": 8000000, "actual": 8000000 },
+                        "Equipment": { "planned": 3000000, "actual": 2500000 },
+                        "Travel": { "planned": 3000000, "actual": 2500000 },
+                        "Training": { "planned": 3000000, "actual": 2500000 }
+                    }
+                }
+            };
+        }
+        
+        // Initialize with demo data
+        window.onload = function() {
+            // Set default dates
+            const today = new Date();
+            const lastYear = new Date(today.getFullYear() - 1, 0, 1);
+            document.getElementById('startDate').valueAsDate = lastYear;
+            document.getElementById('endDate').valueAsDate = today;
+            
+            // Generate initial demo data
+            budgetData = generateDemoData();
+        }
+    </script>
+</body>
+</html>

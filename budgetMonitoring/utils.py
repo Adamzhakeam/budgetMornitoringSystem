@@ -98,6 +98,7 @@ def getQuarterlyPerfromanceMetric(budgetId: str) -> dict:
     Returns performance metrics with category-based analysis and item-level details:
     
     """
+    print('running')
     # Get all quarters
     quarters_res = db.getQuartersByBudgetId(budgetId)
     if not quarters_res['status']:
@@ -118,7 +119,7 @@ def getQuarterlyPerfromanceMetric(budgetId: str) -> dict:
         # Get financial data
         disbursements = getDisbursementsForQuarter(budgetId, quarter_id)
         expenditures = getExpendituresForQuarter(budgetId, quarter_id)
-        
+        # print('>>>>>>>>',expenditures)
         # Calculate metrics
         results[quarter_id] = {
             "financial": calculateFinancialMetrics(
@@ -126,7 +127,9 @@ def getQuarterlyPerfromanceMetric(budgetId: str) -> dict:
                 disbursed=disbursements['total'],
                 expended=expenditures['total'],
                 items=expenditures['items']
+                
             ),
+            
             "category_analysis": calculateCategoryPerformance(
                 planned_items,
                 planned_categories,
@@ -135,7 +138,12 @@ def getQuarterlyPerfromanceMetric(budgetId: str) -> dict:
             "budget_health": calculateUtilisation(
                 disbursements['total'],
                 expenditures['total']
-            )
+            ),
+            'quarterStartDate':quarters_res['data'][0]['startDate'],
+            'quarterEndDate':quarters_res['data'][0]['endDate'],
+            'datesOfExpense':expenditures['dateOfExpense'],
+            'amountsSpent':expenditures['amountSpent'],
+            'quarterId':quarter_id
         }
     
     return results
@@ -155,6 +163,7 @@ def calculateFinancialMetrics(planned: float, disbursed: float,
                               expended: float, items: list) -> dict:
     """Calculates variance and standard deviation"""
     return {
+        
         "planned": planned,
         "disbursed": disbursed,
         "expended": expended,
@@ -190,9 +199,12 @@ def getExpendituresForQuarter(budgetId: str, quarterId: str) -> dict:
     
     all_amounts = []
     item_details = {}
-    
+    datesOfExpense = []
+    amountSpent = []
     for record in res['data']:
         details = record['detailsOfexpense']
+        datesOfExpense.append(record['dateOfExpense'])
+        amountSpent.append(record['amountSpent'])
         for i in range(len(details['items'])):
             item = details['items'][i]
             amount = details['quantity'][i] * details['amount'][i]
@@ -211,7 +223,10 @@ def getExpendituresForQuarter(budgetId: str, quarterId: str) -> dict:
     return {
         'total': sum(all_amounts),
         'items': all_amounts,
-        'item_details': item_details
+        'item_details': item_details,
+        'dateOfExpense':datesOfExpense,
+        'amountSpent':amountSpent
+        # 'otherAmounts':all_amounts
     }
 
 def calculateCategoryPerformance(planned_items: dict, 
@@ -319,7 +334,10 @@ def getSingleQuarterlyPerfromanceMetric(budgetId: str, date: str) -> dict:
             "budget_health": calculateUtilisation(
                 disbursements.get('total', 0.0),
                 expenditures.get('total', 0.0)
-            )
+            ),
+            'dateOfExpense':expenditures['dateOfExpense'],
+            'QuarterStartDate':quarters_res['data'][0]['startDate'],
+            'QuarterEndDate':quarters_res['data'][0]['endDate']
         }
 
     # If no quarter succeeded, return the first failure response
@@ -332,6 +350,7 @@ def getSingleQuarterlyPerfromanceMetric(budgetId: str, date: str) -> dict:
     return {
         "status": True,
         "results": results,
+        
         "failed_quarters": failed_quarters
     }
 
@@ -387,7 +406,8 @@ def getExpendituresForSingleQuarter(budgetId: str, quarterIds, date: str) -> dic
             'total': sum(all_amounts),
             'items': all_amounts,
             'item_details': item_details,
-            'quarterId': qid
+            'quarterId': qid,
+            'dateOfExpense':res['data'][0]['dateOfExpense']
         }
 
     # ❌ All quarters failed
