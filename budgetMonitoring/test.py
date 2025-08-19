@@ -628,4 +628,75 @@ if __name__ == "__main__":
         # pass
         
         
-      
+      // Generate demo data for testing
+        //function generateDemoData() {
+           //// return {
+               // "Q1-2023": {
+                    "quarterStartDate": "2023-01-01",
+                    "quarterEndDate": "2023-03-31",
+                    "financial": {
+                        "planned": 15000000,
+                        "expended": 14200000,
+                        "balance": 800000
+                    },
+                    "datesOfExpense": [
+                        "2023-01-15", "2023-02-10", "2023-03-05", 
+                        "2023-03-20", "2023-03-25"
+                    ],
+                    "amountsSpent": [
+                        3000000, 4500000, 2500000, 3200000, 1000000
+                    ],
+                    "category_analysis": {
+                        "Salaries": { "planned": 8000000, "actual": 7800000 },
+                        "Equipment": { "planned": 3000000, "actual": 3200000 },
+                        "Travel": { "planned": 2000000, "actual": 1800000 },
+                        "Training": { "planned": 2000000, "actual": 1400000 }
+                    }
+                },
+                "Q2-2023": {
+                    "quarterStartDate": "2023-04-01",
+                    "quarterEndDate": "2023-06-30",
+                    "financial": {
+                        "planned": 18000000,
+                        "expended": 19000000,
+                        "balance": -1000000
+                    },
+                    "datesOfExpense": [
+                        "2023-04-12", "2023-05-03", "2023-05-18", 
+                        "2023-06-10", "2023-06-22"
+                    ],
+                    "amountsSpent": [
+                        4200000, 3800000, 4500000, 3500000, 3000000
+                    ],
+                    "category_analysis": {
+                        "Salaries": { "planned": 8500000, "actual": 8500000 },
+                        "Equipment": { "planned": 4000000, "actual": 4500000 },
+                        "Travel": { "planned": 2500000, "actual": 3000000 },
+                        "Training": { "planned": 3000000, "actual": 3000000 }
+                    }
+                },
+                "Q3-2023": {
+                    "quarterStartDate": "2023-07-01",
+                    "quarterEndDate": "2023-09-30",
+                    "financial": {
+                        "planned": 17000000,
+                        "expended": 15500000,
+                        "balance": 1500000
+                    },
+                    "datesOfExpense": [
+                        "2023-07-08", "2023-08-15", "2023-09-01", 
+                        "2023-09-15", "2023-09-28"
+                    ],
+                    "amountsSpent": [
+                        2800000, 3200000, 3500000, 3000000, 3000000
+                    ],
+                    "category_analysis": {
+                        "Salaries": { "planned": 8000000, "actual": 8000000 },
+                        "Equipment": { "planned": 3000000, "actual": 2500000 },
+                        "Travel": { "planned": 3000000, "actual": 2500000 },
+                        "Training": { "planned": 3000000, "actual": 2500000 }
+                    }
+                }
+            };
+        }
+        
