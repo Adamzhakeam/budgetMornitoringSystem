@@ -2324,4 +2324,4 @@ clearingAccounts = {
 }
 
 if __name__ == '__main__':
-    print(len(liabilitiesSummary))
+    print(len(clearingAccounts))

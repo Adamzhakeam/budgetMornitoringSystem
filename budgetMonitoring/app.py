@@ -146,6 +146,29 @@ def handleSingleQuarterMetrics():
                 
          metrics = getQuarterlyPerfromanceMetric(payload['budgetId'])
          return metrics 
+     
+@app.route('/getAnyChartAccount',methods=['POST'])
+def handleSearchAnyChartAccount():
+    from db import getAnyChartAccount
+    
+    payload = request.get_json()
+    payloadStructure = {
+        'accountName' : kutils.config.getValue('bbmsDb/accountName'),
+        
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    
+    if validationResponse['status']:
+         for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+                
+         matches = getAnyChartAccount(payload['accountName'])
+         return matches 
+
 
      
 @app.route('/adduser',methods=['POST'])
@@ -196,6 +219,45 @@ def handleAdduser():
     
     return jsonify(validationResponse)
 
+@app.route('/addBudget',methods=['POST'])
+# @role_required(['MANAGER'])
+def handleAddBudget():
+    '''
+    this function is responsible for handling 
+    the adduser endpoint 
+    '''
+    from db import insertDataIntoBudget
+    payload = request.get_json()
+    payloadStructure = {
+        'department':kutils.config.getValue('bbmsDb/department'),
+        'vote':kutils.config.getValue('bbmsDb/vote'),
+        'programme':kutils.config.getValue('bbmsDb/programme'),
+        'working':kutils.config.getValue('bbmsDb/working'),
+        'planned':kutils.config.getValue('bbmsDb/planned'),
+        'dateOfApproval':kutils.config.getValue('bbmsDb/dateOfApproval'),
+        'detailsOfBudget':kutils.config.getValue('bbmsDb/detailsOfBudget'),
+        'description':kutils.config.getValue('bbmsDb/description'),
+        'others':kutils.config.getValue('bbmsDb/others')
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    print('>>',validationResponse)
+    print('>>>>',payload)
+    if validationResponse['status']:
+        for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+        
+        createUserResponse  = insertDataIntoBudget(payload)
+            
+            
+        return jsonify(createUserResponse)
+    
+    return jsonify(validationResponse)
+
+
 
 
 
@@ -220,6 +282,15 @@ def init():
             'others':dict,
             'budgetId':str,
             'quaterMonthDate':str,
+            'accountName':str,
+            'department':str,
+            'vote':str,
+            'programme':str,
+            'working':int,
+            'planned':int,
+            'detailsOfBudget':dict,
+            'description':str,
+            'dateOfApproval':str,
             'SECRETE_KEY':kutils.codes.new(),
             'SESSION_TYPE':'filesystem',
             'SESSION_PERMANENT':False,

@@ -5,6 +5,7 @@
 from datetime import datetime
 import pandas as pd
 import db
+from Levenshtein import distance as levenshtein_distance
 
 def getOverallPercentages(budgetAmount:dict,expenditureAmount:dict)->dict:
     '''
@@ -195,7 +196,7 @@ def getExpendituresForQuarter(budgetId: str, quarterId: str) -> dict:
     """Enhanced to return category and item details"""
     res = db.getExpendituresByBudgetQuarter(budgetId, quarterId)
     if not res['status']:
-        return {'total': 0.0, 'items': [], 'item_details': {}}
+        return {'total': 0.0, 'items': [], 'item_details': {},'dateOfExpense':[],'amountSpent':[]}
     
     all_amounts = []
     item_details = {}

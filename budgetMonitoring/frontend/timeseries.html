@@ -562,11 +562,11 @@
             const sortedAmounts = sortedIndices.map(i => allAmounts[i]);
             
             // Prepare quarter labels for each data point
-            const quarterLabels = sortedDates.map(date => quarterInfo[date].quarterLabel);
-            const quarterIds = sortedDates.map(date => quarterInfo[date].quarterId);
+            const quarterLabels = sortedDates.map(date => quarterInfo[date]?.quarterLabel || 'Unknown');
+            const quarterIds = sortedDates.map(date => quarterInfo[date]?.quarterId || 'unknown');
             
-            // Get unique quarter labels for legend
-            const uniqueQuarterLabels = [...new Set(quarterLabels)];
+            // Get unique quarter labels for legend - use the quartersInRange to get all quarters
+            const uniqueQuarterLabels = [...new Set(quartersInRange.map(q => q.quarterLabel))];
             
             // Render the chart
             renderTimeSeriesChart(sortedDates, sortedAmounts, quarterLabels, quarterIds, uniqueQuarterLabels, quartersInRange);
@@ -641,12 +641,12 @@
             
             dashboard.appendChild(card);
             
-            // Create quarter tags
+            // Create quarter tags - show all quarters in range, not just those with data points
             const quarterTags = document.getElementById('quarterTags');
-            uniqueQuarterLabels.forEach(label => {
+            quartersInRange.forEach(quarter => {
                 const tag = document.createElement('div');
                 tag.className = 'quarter-tag';
-                tag.textContent = label;
+                tag.textContent = quarter.quarterLabel;
                 quarterTags.appendChild(tag);
             });
             
@@ -660,7 +660,11 @@
                 {start: '#59a14f', end: '#4a8a41'}, 
                 {start: '#e15759', end: '#c44a4c'}, 
                 {start: '#76b7b2', end: '#5f9c98'}, 
-                {start: '#edc948', end: '#d8b640'}
+                {start: '#edc948', end: '#d8b640'},
+                {start: '#af7aa1', end: '#8c5b7b'},
+                {start: '#ff9da7', end: '#d87a84'},
+                {start: '#9c755f', end: '#7d5e4b'},
+                {start: '#bab0ac', end: '#958c89'}
             ];
             
             // Create a dataset for each unique quarter

@@ -8,7 +8,7 @@
 import kisa_utils as kutils
 import chartsOfAccounts
 import utils
-
+from Levenshtein import distance as levenshtein_distance
 
 def createTables():
     '''
@@ -38,6 +38,69 @@ def makeDataInserter():
             return {'status': False, 'error': str(e)}
     
     return insertDataIntoDb
+
+def getAnyChartAccount(accountName: str) -> dict:
+    '''
+        this function is responsible for seacrhing through the database into all the 
+        tables of charts of accounts data and then 
+    
+    '''
+   
+    
+    charts = [
+        'fundDetails', 'typesOfFundingSource', 'domesticFundSource', 'commercialBankFundSources',
+        'multiLateralDevelopmentPartners', 'biLateralDevelopmentPartners', 'programs',
+        'voteCostCenterMinistries', 'voteCostCenterAgencies', 'voteCostCenterPusatis',
+        'voteCostCenterRefferalHospitals', 'voteCostCenterEmbassies', 'voteCostCenterCities',
+        'voteCostCenterMunicipal', 'voteCostCenterDistricts', 'voteCostCenterLocation', 'revenueSummary',
+        'expenditureSummary', 'assetsSummary', 'liabilitiesSummary', 'reservesSummary', 'clearingAccounts'
+    ]
+    
+    all_results = []
+    search_pattern = f"%{accountName}%"
+    
+    for table in charts:
+        response = getAnyTableData({
+            'tableName': table,
+            'columns': ['*'],
+            'condition': 'name LIKE ?',
+            'conditionalData': [search_pattern],
+            'limit': 500,  # Increased limit to gather more potential matches because the biggest chart i have has about 300+ accounts
+            'returnDicts': True,
+            'returnNamespaces': False,
+            'parseJson': True,
+            'returnGenerator': False
+        })
+        
+        if response['status'] and response['data']:
+            # Calculate similarity score for each result
+            for item in response['data']:
+                item_name = item.get('name', '')
+                # Calculate Levenshtein distance (lower = more similar)
+                edit_distance = levenshtein_distance(accountName.lower(), item_name.lower())
+                # Convert to similarity score (higher = more similar)
+                max_len = max(len(accountName), len(item_name))
+                similarity_score = 1 - (edit_distance / max_len) if max_len > 0 else 0
+                item['similarity_score'] = similarity_score
+                
+            all_results.extend(response['data'])
+    
+    if not all_results:
+        return {
+            'status': False,
+            'message': 'No matching accounts found',
+            'data': []
+        }
+    
+    # Sort results by similarity score (descending order)
+    sorted_results = sorted(all_results, key=lambda x: x['similarity_score'], reverse=True)
+    
+    # Return top 50 most similar results
+    return {
+        'status': True,
+        'data': sorted_results[:50],
+        'total_matches': len(sorted_results)
+    }    
 
 
 # --#-- the modules below are responsible for handling users----- #---#--#--#-
@@ -299,7 +362,13 @@ def getAnyTableData(tableDetails:dict)-> dict:
         if not len(fetchResponse):
             return {'status':False,
                     'log':f'no registered data realted to instructions provided in table {tableDetails["tableName"]}'}
+        
+        for account in fetchResponse:
+            # print(index)
+            account.update({'table':tableDetails['tableName']})
+        # print('>>>>>>>>',fetchResponse)
         return {'status':True,'data':fetchResponse}
+    
     return {'status':False,'log':fetchResponse}
     
 # --- below is the disbursemnt databse insertion logic
@@ -845,15 +914,29 @@ if __name__ == '__main__':
     "voteCostCenterMinistries": chartsOfAccounts.voteCostCenterMinistries,
     "voteCostCenterMunicipal": chartsOfAccounts.voteCostCenterMunicipal,
     "voteCostCenterRefferalHospitals": chartsOfAccounts.voteCostCenterRefferalHospitals,
-    "voteCostCenterrefferalPusatis": chartsOfAccounts.voteCostCenterrefferalPusatis,
+    "voteCostCenterPusatis": chartsOfAccounts.voteCostCenterrefferalPusatis,
     "clearingAccounts": chartsOfAccounts.clearingAccounts,
     "biLateralDevelopmentPartners": chartsOfAccounts.biLateralDevelopmentPartners
 }
     import pprint
-    print(createTables())
-    # insertData = makeDataInserter()
-    # for table , account in chartsOfAccountsData.items():
-    #     insertData(table,account)
+    # print(createTables())
+#     insertData = makeDataInserter()
+#     # for table , account in chartsOfAccountsData.items():
+#     pprint.pprint(insertData("voteCostCenterPusatis",{
+#     "301": "Makerere University",
+#     "302": "Mbarara University",
+#     "303": "Makerere University Business School",
+#     "304": "Kyambogo University",
+#     "305": "Busitema University",
+#     "306": "Muni University",
+#     "307": "Kabale University",
+#     "308": "Soroti University",
+#     "309": "Gulu University",
+#     "310": "Lira University",
+#     "311": "Law Development Centre",
+#     "312": "Uganda Management Institute",
+#     "313": "Mountains of the Moon University"
+# }))
        
             
  
