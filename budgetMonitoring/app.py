@@ -257,7 +257,25 @@ def handleAddBudget():
     
     return jsonify(validationResponse)
 
-
+@app.route('/getBudget',methods=['POST'])
+def handleGetBudgets():
+    from db import getAnyTableData
+    # payload = request.get_json()
+    fetchResponse = getAnyTableData(
+        {
+        'tableName': 'budget',
+        'columns': ['*'],
+        'condition': '',
+        'conditionalData': [],
+        'limit':100,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False 
+        
+    }
+    )
+    return jsonify(fetchResponse)
 
 
 

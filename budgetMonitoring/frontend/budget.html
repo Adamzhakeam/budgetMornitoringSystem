@@ -147,6 +147,19 @@
             color: #6c757d;
             font-style: italic;
         }
+        
+        .validation-error {
+            color: var(--accent-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .key-display {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -177,6 +190,7 @@
                                             <div class="search-results" id="department-results"></div>
                                         </div>
                                         <input type="hidden" id="departmentId" name="departmentId">
+                                        <div class="validation-error" id="department-error">Please select a department</div>
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
@@ -186,6 +200,7 @@
                                             <div class="search-results" id="vote-results"></div>
                                         </div>
                                         <input type="hidden" id="voteId" name="voteId">
+                                        <div class="validation-error" id="vote-error">Please select a vote</div>
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
@@ -195,21 +210,25 @@
                                             <div class="search-results" id="programme-results"></div>
                                         </div>
                                         <input type="hidden" id="programmeId" name="programmeId">
+                                        <div class="validation-error" id="programme-error">Please select a programme</div>
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
                                         <label for="working" class="form-label required-field">Working Budget</label>
                                         <input type="number" class="form-control" id="working" name="working" placeholder="Enter working budget amount" step="1" min="0">
+                                        <div class="validation-error" id="working-error">Please enter a valid amount</div>
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
                                         <label for="planned" class="form-label required-field">Planned Budget</label>
                                         <input type="number" class="form-control" id="planned" name="planned" placeholder="Enter planned budget amount" step="1" min="0">
+                                        <div class="validation-error" id="planned-error">Please enter a valid amount</div>
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
                                         <label for="dateOfApproval" class="form-label required-field">Date of Approval</label>
                                         <input type="date" class="form-control" id="dateOfApproval" name="dateOfApproval">
+                                        <div class="validation-error" id="dateOfApproval-error">Please select a date</div>
                                     </div>
                                 </div>
                             </div>
@@ -227,21 +246,25 @@
                                                     <div class="search-results category-results"></div>
                                                 </div>
                                                 <input type="hidden" class="category-id">
+                                                <div class="validation-error category-error">Please select a category</div>
                                             </div>
                                             
                                             <div class="col-md-3 mb-3">
                                                 <label class="form-label">Item</label>
                                                 <input type="text" class="form-control item-name" placeholder="Item name">
+                                                <div class="validation-error item-error">Please enter an item name</div>
                                             </div>
                                             
                                             <div class="col-md-2 mb-3">
                                                 <label class="form-label">Quantity</label>
                                                 <input type="number" class="form-control quantity" placeholder="Qty" step="1" min="0">
+                                                <div class="validation-error quantity-error">Please enter a valid quantity</div>
                                             </div>
                                             
                                             <div class="col-md-2 mb-3">
                                                 <label class="form-label">Amount (UGX)</label>
                                                 <input type="number" class="form-control amount" placeholder="Amount" step="1" min="0">
+                                                <div class="validation-error amount-error">Please enter a valid amount</div>
                                             </div>
                                             
                                             <div class="col-md-1 mb-3 d-flex align-items-end">
@@ -277,17 +300,20 @@
                                                         <div class="search-results other-results"></div>
                                                     </div>
                                                     <input type="hidden" class="other-id">
+                                                    <div class="key-display">Key: <span class="key-text">Not selected</span></div>
                                                     <div class="manual-input-toggle" onclick="toggleManualInput(this)">
-                                                        <i class="fas fa-pencil-alt me-1"></i> Enter manually
+                                                        <i class="fas fa-pencil-alt me-1"></i> Enter key manually
                                                     </div>
                                                     <div class="manual-input-field">
                                                         <input type="text" class="form-control other-key" placeholder="Enter key manually">
                                                         <small class="text-muted">This will be used as the ID</small>
                                                     </div>
+                                                    <div class="validation-error other-key-error">Please enter a key</div>
                                                 </div>
                                                 
                                                 <div class="col-md-5 mb-2">
                                                     <input type="text" class="form-control other-value" placeholder="Value">
+                                                    <div class="validation-error other-value-error">Please enter a value</div>
                                                 </div>
                                                 
                                                 <div class="col-md-2 mb-2 d-flex align-items-end">
@@ -381,16 +407,27 @@
             const manualInputField = element.nextElementSibling;
             const searchInput = element.parentElement.querySelector('.other-search');
             const searchResults = element.parentElement.querySelector('.search-results');
+            const keyDisplay = element.parentElement.querySelector('.key-display');
             
             if (manualInputField.style.display === 'block') {
                 manualInputField.style.display = 'none';
                 searchInput.style.display = 'block';
-                element.innerHTML = '<i class="fas fa-pencil-alt me-1"></i> Enter manually';
+                keyDisplay.style.display = 'block';
+                element.innerHTML = '<i class="fas fa-pencil-alt me-1"></i> Enter key manually';
             } else {
                 manualInputField.style.display = 'block';
                 searchInput.style.display = 'none';
                 searchResults.style.display = 'none';
+                keyDisplay.style.display = 'none';
                 element.innerHTML = '<i class="fas fa-search me-1"></i> Search instead';
+                
+                // Clear any selected item when switching to manual input
+                const hiddenId = element.parentElement.querySelector('.other-id');
+                hiddenId.value = '';
+                
+                // Update key display
+                const keyText = element.parentElement.querySelector('.key-text');
+                keyText.textContent = 'Manual input';
             }
         }
         
@@ -511,6 +548,9 @@
                     document.getElementById(field).value = `${item.name} ^ ${item.table}`;
                     document.getElementById(`${field}Id`).value = item.Id;
                     resultsContainer.style.display = 'none';
+                    
+                    // Hide any validation error
+                    document.getElementById(`${field}-error`).style.display = 'none';
                 });
                 
                 resultsContainer.appendChild(resultItem);
@@ -537,6 +577,9 @@
                     inputElement.value = `${item.name} ^ ${item.table}`;
                     inputElement.nextElementSibling.nextElementSibling.value = item.Id;
                     resultsContainer.style.display = 'none';
+                    
+                    // Hide validation error
+                    inputElement.closest('.mb-3').querySelector('.validation-error').style.display = 'none';
                 });
                 
                 resultsContainer.appendChild(resultItem);
@@ -561,15 +604,26 @@
                 
                 resultItem.addEventListener('click', function() {
                     inputElement.value = `${item.name} ^ ${item.table}`;
-                    inputElement.nextElementSibling.nextElementSibling.value = item.Id;
                     
-                    // Also set the value field for convenience
-                    const valueInput = inputElement.closest('.row').querySelector('.other-value');
-                    if (valueInput && !valueInput.value) {
-                        valueInput.value = item.name;
+                    // Set the hidden ID field
+                    const hiddenId = inputElement.nextElementSibling;
+                    hiddenId.value = item.Id;
+                    
+                    // Update key display
+                    const keyDisplay = inputElement.parentElement.querySelector('.key-text');
+                    keyDisplay.textContent = item.Id;
+                    
+                    // Clear the manual input field if it's visible
+                    const manualInput = inputElement.parentElement.querySelector('.other-key');
+                    if (manualInput) {
+                        manualInput.value = '';
                     }
                     
                     resultsContainer.style.display = 'none';
+                    
+                    // Hide validation errors
+                    inputElement.closest('.row').querySelector('.other-key-error').style.display = 'none';
+                    inputElement.closest('.row').querySelector('.other-value-error').style.display = 'none';
                 });
                 
                 resultsContainer.appendChild(resultItem);
@@ -590,21 +644,25 @@
                             <div class="search-results category-results"></div>
                         </div>
                         <input type="hidden" class="category-id">
+                        <div class="validation-error category-error">Please select a category</div>
                     </div>
                     
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Item</label>
                         <input type="text" class="form-control item-name" placeholder="Item name">
+                        <div class="validation-error item-error">Please enter an item name</div>
                     </div>
                     
                     <div class="col-md-2 mb-3">
                         <label class="form-label">Quantity</label>
                         <input type="number" class="form-control quantity" placeholder="Qty" step="1" min="0">
+                        <div class="validation-error quantity-error">Please enter a valid quantity</div>
                     </div>
                     
                     <div class="col-md-2 mb-3">
                         <label class="form-label">Amount (UGX)</label>
                         <input type="number" class="form-control amount" placeholder="Amount" step="1" min="0">
+                        <div class="validation-error amount-error">Please enter a valid amount</div>
                     </div>
                     
                     <div class="col-md-1 mb-3 d-flex align-items-end">
@@ -646,17 +704,20 @@
                             <div class="search-results other-results"></div>
                         </div>
                         <input type="hidden" class="other-id">
+                        <div class="key-display">Key: <span class="key-text">Not selected</span></div>
                         <div class="manual-input-toggle" onclick="toggleManualInput(this)">
-                            <i class="fas fa-pencil-alt me-1"></i> Enter manually
+                            <i class="fas fa-pencil-alt me-1"></i> Enter key manually
                         </div>
                         <div class="manual-input-field">
                             <input type="text" class="form-control other-key" placeholder="Enter key manually">
                             <small class="text-muted">This will be used as the ID</small>
                         </div>
+                        <div class="validation-error other-key-error">Please enter a key</div>
                     </div>
                     
                     <div class="col-md-5 mb-2">
                         <input type="text" class="form-control other-value" placeholder="Value">
+                        <div class="validation-error other-value-error">Please enter a value</div>
                     </div>
                     
                     <div class="col-md-2 mb-2 d-flex align-items-end">
@@ -677,6 +738,23 @@
                     searchOther(this.value, this);
                 }, 500);
             });
+            
+            // Add event listener for manual input toggle
+            const toggleElement = newItem.querySelector('.manual-input-toggle');
+            toggleElement.addEventListener('click', function() {
+                toggleManualInput(this);
+            });
+            
+            // Add event listener for manual key input
+            const manualKeyInput = newItem.querySelector('.other-key');
+            manualKeyInput.addEventListener('input', function() {
+                const keyDisplay = this.closest('.mb-2').querySelector('.key-text');
+                keyDisplay.textContent = this.value || 'Manual input';
+                
+                // Clear the hidden ID field when using manual input
+                const hiddenId = this.closest('.mb-2').querySelector('.other-id');
+                hiddenId.value = '';
+            });
         }
         
         // Remove other item row
@@ -685,9 +763,112 @@
             itemRow.remove();
         }
         
+        // Validate form before submission
+        function validateForm() {
+            let isValid = true;
+            
+            // Validate basic information
+            const departmentId = document.getElementById('departmentId').value;
+            if (!departmentId) {
+                document.getElementById('department-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            const voteId = document.getElementById('voteId').value;
+            if (!voteId) {
+                document.getElementById('vote-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            const programmeId = document.getElementById('programmeId').value;
+            if (!programmeId) {
+                document.getElementById('programme-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            const working = document.getElementById('working').value;
+            if (!working || isNaN(working) || working <= 0) {
+                document.getElementById('working-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            const planned = document.getElementById('planned').value;
+            if (!planned || isNaN(planned) || planned <= 0) {
+                document.getElementById('planned-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            const dateOfApproval = document.getElementById('dateOfApproval').value;
+            if (!dateOfApproval) {
+                document.getElementById('dateOfApproval-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate budget items
+            document.querySelectorAll('.budget-item-row').forEach((row, index) => {
+                const category = row.querySelector('.category-search').value;
+                if (!category) {
+                    row.querySelector('.category-error').style.display = 'block';
+                    isValid = false;
+                }
+                
+                const itemName = row.querySelector('.item-name').value;
+                if (!itemName) {
+                    row.querySelector('.item-error').style.display = 'block';
+                    isValid = false;
+                }
+                
+                const quantity = row.querySelector('.quantity').value;
+                if (!quantity || isNaN(quantity) || quantity <= 0) {
+                    row.querySelector('.quantity-error').style.display = 'block';
+                    isValid = false;
+                }
+                
+                const amount = row.querySelector('.amount').value;
+                if (!amount || isNaN(amount) || amount <= 0) {
+                    row.querySelector('.amount-error').style.display = 'block';
+                    isValid = false;
+                }
+            });
+            
+            // Validate other items
+            document.querySelectorAll('.others-item-row').forEach(row => {
+                const otherId = row.querySelector('.other-id').value;
+                const manualKey = row.querySelector('.other-key').value;
+                const value = row.querySelector('.other-value').value;
+                
+                if ((!otherId && !manualKey) && value) {
+                    row.querySelector('.other-key-error').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (value && (!otherId && !manualKey)) {
+                    row.querySelector('.other-key-error').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if ((otherId || manualKey) && !value) {
+                    row.querySelector('.other-value-error').style.display = 'block';
+                    isValid = false;
+                }
+            });
+            
+            return isValid;
+        }
+        
         // Form submission
         document.getElementById('budgetForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Hide all validation errors first
+            document.querySelectorAll('.validation-error').forEach(error => {
+                error.style.display = 'none';
+            });
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
             
             // Prepare budget details
             const budgetDetails = {
@@ -704,20 +885,18 @@
                 budgetDetails.categories.push(row.querySelector('.category-search').value);
             });
             
-            // Prepare other items
+            // Prepare other items - FIXED: Handle both dropdown selection and manual input
             const others = {};
             document.querySelectorAll('.others-item-row').forEach(row => {
                 let id = row.querySelector('.other-id').value;
                 const manualKey = row.querySelector('.other-key').value;
                 const value = row.querySelector('.other-value').value;
                 
-                // Use manual key if provided and no ID from dropdown
-                if (!id && manualKey) {
-                    id = manualKey;
-                }
+                // Use manual key if provided, otherwise use dropdown ID
+                let key = manualKey || id;
                 
-                if (id && value) {
-                    others[id] = value;
+                if (key && value) {
+                    others[key] = value;
                 }
             });
             
@@ -749,6 +928,23 @@
                 if (data.status) {
                     alert('Budget added successfully!');
                     document.getElementById('budgetForm').reset();
+                    
+                    // Reset hidden fields
+                    document.getElementById('departmentId').value = '';
+                    document.getElementById('voteId').value = '';
+                    document.getElementById('programmeId').value = '';
+                    
+                    // Clear budget items and add one empty row
+                    document.getElementById('budgetItems').innerHTML = '';
+                    addBudgetItem();
+                    
+                    // Clear other items and add one empty row
+                    document.getElementById('otherItems').innerHTML = '';
+                    addOtherItem();
+                    
+                    // Set current date as default for approval date
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('dateOfApproval').value = today;
                 } else {
                     alert('Error: ' + data.log);
                 }

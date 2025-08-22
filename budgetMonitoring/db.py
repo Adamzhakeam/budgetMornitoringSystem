@@ -371,6 +371,8 @@ def getAnyTableData(tableDetails:dict)-> dict:
     
     return {'status':False,'log':fetchResponse}
     
+# -----budget selection ---
+
 # --- below is the disbursemnt databse insertion logic
 def insertDataIntoDisbursement(disbursementDetails: dict) -> dict:
     '''
