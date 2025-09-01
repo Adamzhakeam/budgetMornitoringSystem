@@ -18,8 +18,6 @@ from Levenshtein import distance as levenshtein_distance
 quarters = [
     # Budget 1: bIDEyNOJYTT (Infrastructure)
     {
-        "quaterId": "Q1-2023-bIDEyNOJYTT",
-        "budgetId": "bIDEyNOJYTT",
         "name": "Q1 2023 - National Infrastructure",
         "startDate": "2023-01-01",
         "endDate": "2023-03-31"
@@ -116,10 +114,10 @@ if __name__ == "__main__":
     # pprint.pprint(db.getQuartersByBudgetId('bIDvWU6mkod'))
     
     pprint.pprint(db.getAnyTableData({
-        'tableName': 'budget',
+        'tableName': 'budgetQuaters',
         'columns': ['*'],
         'condition': 'budgetId = ?',
-        'conditionalData': ['bIDEyNOJYTT'],
+        'conditionalData': ['bIDRoxBPtN2'],
         'limit':100,
         'returnDicts': True,
         'returnNamespaces': False,

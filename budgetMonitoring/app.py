@@ -224,7 +224,7 @@ def handleAdduser():
 def handleAddBudget():
     '''
     this function is responsible for handling 
-    the adduser endpoint 
+    the addbudget endpoint 
     '''
     from db import insertDataIntoBudget
     payload = request.get_json()
@@ -256,6 +256,40 @@ def handleAddBudget():
         return jsonify(createUserResponse)
     
     return jsonify(validationResponse)
+
+@app.route('/addQuarter',methods=['POST'])
+# @role_required(['MANAGER'])
+def handleAddQuarter():
+    '''
+    this function is responsible for handling 
+    the addingQuarter endpoint 
+    '''
+    from db import insertDataIntoBudgetQuaters
+    payload = request.get_json()
+    payloadStructure = {
+        'budgetId':kutils.config.getValue('bbmsDb/budgetId'),
+        'startDate':kutils.config.getValue('bbmsDb/startDate'),
+        'endDate':kutils.config.getValue('bbmsDb/endDate'),
+        'others':kutils.config.getValue('bbmsDb/others')
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    print('>>',validationResponse)
+    print('>>>>',payload)
+    if validationResponse['status']:
+        for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+        
+        createUserResponse  = insertDataIntoBudgetQuaters(payload)
+            
+            
+        return jsonify(createUserResponse)
+    
+    return jsonify(validationResponse)
+
 
 @app.route('/getBudget',methods=['POST'])
 def handleGetBudgets():
@@ -309,6 +343,8 @@ def init():
             'detailsOfBudget':dict,
             'description':str,
             'dateOfApproval':str,
+            'startDate':str,
+            'endDate':str,
             'SECRETE_KEY':kutils.codes.new(),
             'SESSION_TYPE':'filesystem',
             'SESSION_PERMANENT':False,
