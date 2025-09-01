@@ -127,12 +127,12 @@ def handleQuarterMetrics():
      
 @app.route('/getSingleQuarterMetrics',methods=['POST'])
 def handleSingleQuarterMetrics():
-    from utils import getQuarterlyPerfromanceMetric
+    from utils import getSingleQuarterlyPerfromanceMetric
     
     payload = request.get_json()
     payloadStructure = {
         'budgetId' : kutils.config.getValue('bbmsDb/budgetId'),
-        # 'quaterMonthDate':kutils.config.getValue('bbmsDb/quaterMonthDate')
+        'quaterMonthDate':kutils.config.getValue('bbmsDb/quaterMonthDate')
     }
     validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
     
@@ -144,7 +144,7 @@ def handleSingleQuarterMetrics():
                     'log': f'The value for {key} is missing. Please provide it.'
                 })
                 
-         metrics = getQuarterlyPerfromanceMetric(payload['budgetId'])
+         metrics = getSingleQuarterlyPerfromanceMetric(payload['budgetId'],payload['quaterMonthDate'])
          return metrics 
      
 @app.route('/getAnyChartAccount',methods=['POST'])

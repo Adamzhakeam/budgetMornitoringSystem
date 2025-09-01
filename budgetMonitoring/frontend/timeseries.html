@@ -6,7 +6,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        :root {
+        /* ... (keep all existing styles) ... */
+           :root {
             --primary: #3a7bd5;
             --secondary: #00d2ff;
             --success: #4CAF50;
@@ -379,6 +380,34 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        
+        /* Additional style for the loading spinner in dropdown */
+        select:focus{
+               background: rgba(255,255,255,0.25);
+        }
+        select option {
+    background: lightblue;
+    color: #333;
+}
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3a7bd5;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+            text-decoration-color: #00d2ff;
+            
+            /*background-color: lightblue; */
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -388,8 +417,11 @@
         
         <div class="input-container">
             <div class="input-group">
-                <label for="budgetId">Budget ID</label>
-                <input type="text" id="budgetId" placeholder="Enter Budget ID" value="BGT-2023">
+                <label for="budgetId">Select Budget</label>
+                <select id="budgetId">
+                    <option value="">Loading budgets...</option>
+                </select>
+                <div id="budgetLoading" class="spinner" style="display: inline-block; margin-left: 10px;"></div>
             </div>
             <div class="date-dropdowns">
                 <div class="input-group">
@@ -411,7 +443,7 @@
     </div>
     
     <div id="dashboard" class="dashboard">
-        <div class="loading" id="loadingMessage">Enter budget ID and date range to generate report</div>
+        <div class="loading" id="loadingMessage">Select a budget and date range to generate report</div>
     </div>
 
     <script>
@@ -439,15 +471,65 @@
             dashboard.innerHTML = `<div class="error-message">${message}</div>`;
         }
         
+        // Fetch all budgets from the server
+        async function fetchBudgets() {
+            const budgetSelect = document.getElementById('budgetId');
+            const budgetLoading = document.getElementById('budgetLoading');
+            
+            budgetSelect.innerHTML = '<option value="">Loading budgets...</option>';
+            budgetLoading.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5000/getBudget', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const responseData = await response.json();
+                
+                // Check if the API returned an error
+                if (responseData.status === false) {
+                    throw new Error(responseData.log || 'API returned an error');
+                }
+                
+                // Clear the loading message
+                budgetSelect.innerHTML = '<option value="">Select a budget</option>';
+                
+                // Add each budget to the dropdown
+                if (responseData.data && responseData.data.length > 0) {
+                    responseData.data.forEach(budget => {
+                        const option = document.createElement('option');
+                        option.value = budget.budgetId;
+                        option.textContent = `${budget.vote} (Approved: ${budget.dateOfApproval})`;
+                        budgetSelect.appendChild(option);
+                    });
+                } else {
+                    budgetSelect.innerHTML = '<option value="">No budgets available</option>';
+                }
+            } catch (error) {
+                console.error("Error fetching budgets:", error);
+                budgetSelect.innerHTML = '<option value="">Error loading budgets</option>';
+            } finally {
+                budgetLoading.style.display = 'none';
+            }
+        }
+        
         // Fetch all quarter data for a budget
         async function fetchBudgetData() {
-            const budgetId = document.getElementById('budgetId').value.trim();
+            const budgetSelect = document.getElementById('budgetId');
+            const budgetId = budgetSelect.value;
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             
             // Validate inputs
             if (!budgetId) {
-                showError("Please enter a budget ID.");
+                showError("Please select a budget.");
                 return;
             }
             
@@ -497,7 +579,7 @@
             }
         }
         
-        // Process the data and render the chart based on selected date range
+        // ... (rest of the JavaScript code remains the same) ...
         function processAndRenderChart(startDate, endDate) {
             if (!budgetData) {
                 showError("No budget data available.");
@@ -954,7 +1036,9 @@
             }
         }
         
-        // Initialize without demo data
+        
+       
+        // Initialize by fetching budgets
         window.onload = function() {
             // Set default dates
             const today = new Date();
@@ -962,7 +1046,8 @@
             document.getElementById('startDate').valueAsDate = lastYear;
             document.getElementById('endDate').valueAsDate = today;
             
-            // Don't generate any data automatically
+            // Fetch budgets for the dropdown
+            fetchBudgets();
         }
     </script>
 </body>
