@@ -1,272 +1,529 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Budget Time Series Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Budget Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ... (keep all existing styles) ... */
-           :root {
-            --primary: #3a7bd5;
-            --secondary: #00d2ff;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #F44336;
-            --light: #f5f7fa;
-            --dark: #2c3e50;
+        /* Your existing CSS remains unchanged */
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3a0ca3;
+            --accent: #7209b7;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --info: #560bad;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
         }
-        
+
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4edfb 100%);
-            color: #333;
+            color: var(--gray-800);
+            line-height: 1.6;
             min-height: 100vh;
+            padding: 0;
             background-attachment: fixed;
         }
-        
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
-            pointer-events: none;
-        }
-        
-        .header h1 {
-            margin: 0;
-            font-size: 32px;
-            font-weight: 700;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .header p {
-            margin-top: 10px;
-            opacity: 0.9;
-            font-size: 16px;
-            position: relative;
-            z-index: 1;
-            max-width: 800px;
-        }
-        
-        .input-container {
-            display: flex;
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
             gap: 20px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
         }
-        
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .input-group label {
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        
-        input, select {
-            padding: 12px 15px;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.15);
+
+        /* All your existing CSS remains unchanged */
+         /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--border-radius);
+            padding: 25px 15px;
             color: white;
-            font-size: 15px;
-            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
         }
-        
-        input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: white;
-            background: rgba(255,255,255,0.25);
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
-        }
-        
-        button {
-            padding: 12px 25px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            align-self: flex-end;
+
+        .logo {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 0 10px;
         }
-        
-        button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+        .logo i {
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
         }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
         }
-        
-        .card {
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item span {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
-        
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-        }
-        
-        .card-header {
+            border-radius: var(--border-radius);
+            padding: 20px 25px;
+            box-shadow: var(--box-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
         }
-        
-        .card-title {
-            margin: 0;
-            color: var(--dark);
-            font-size: 22px;
+
+        .header-title h2 {
+            font-size: 24px;
             font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
         }
-        
-        .chart-toggle {
+
+        .header-title p {
+            color: var(--gray-600);
+            font-size: 15px;
+        }
+
+        .header-actions {
             display: flex;
-            gap: 10px;
-            background: #f0f5ff;
-            padding: 5px;
-            border-radius: 8px;
+            gap: 15px;
         }
-        
-        .chart-toggle button {
-            padding: 8px 15px;
-            border-radius: 6px;
-            background: transparent;
-            color: #666;
-            border: none;
-            font-size: 14px;
+
+        .header-action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
         }
-        
-        .chart-toggle button.active {
+
+        .header-action-btn:hover {
             background: var(--primary);
             color: white;
         }
-        
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .bg-primary {
+            background: var(--primary);
+        }
+
+        .bg-success {
+            background: var(--success);
+        }
+
+        .bg-warning {
+            background: var(--warning);
+        }
+
+        .bg-info {
+            background: var(--info);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .positive {
+            color: #2ecc71;
+        }
+
+        .negative {
+            color: #e74c3c;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            margin-top: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
         .chart-container {
             width: 100%;
-            height: 450px;
+            height: 400px;
             position: relative;
         }
-        
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
+
+        /* Input Styles */
+        .input-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
         }
-        
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .input-field {
+            padding: 12px 15px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .generate-btn {
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .generate-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                align-self: stretch;
+                justify-content: space-between;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .section-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Animation for cards */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card, .chart-section, .input-section {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Toggle switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-text {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-300);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .data-table th, .data-table td {
+            padding: 14px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .data-table th {
+            background-color: var(--gray-100);
+            font-weight: 600;
+            colmr: var(--gray-700);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background-color: var(--gray-100);
+        }
+
+        /* Loading and error styles */
         .loading {
             text-align: center;
             padding: 30px;
-            color: #6c757d;
+            color: var(--gray-600);
             font-size: 18px;
         }
-        
+
         .error-message {
-            color: var(--danger);
-            background-color: #fce8e6;
+            color: #e74c3c;
+            background-color: #ffebee;
             padding: 15px;
             border-radius: 8px;
             margin-top: 10px;
             font-weight: 500;
-            border-left: 4px solid var(--danger);
+            border-left: 4px solid #e74c3c;
         }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .metric {
-            background: linear-gradient(to bottom right, #f8f9fa, #f0f5ff);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
-        
-        .metric:hover {
-            transform: translateY(-3px);
-        }
-        
-        .metric-label {
-            font-size: 14px;
-            color: #6c757d;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .metric-value {
-            font-size: 22px;
-            font-weight: 700;
-        }
-        
+
         .badge {
             display: inline-block;
             padding: 5px 12px;
@@ -275,175 +532,179 @@
             font-weight: bold;
             margin-top: 5px;
         }
-        
+
         .positive {
             background-color: #e8f5e9;
             color: #2e7d32;
         }
-        
+
         .negative {
             background-color: #ffebee;
             color: #c62828;
         }
-        
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .comparison-table th, .comparison-table td {
-            padding: 14px 15px;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .comparison-table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .comparison-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .comparison-table tr:hover td {
-            background-color: #f9f9ff;
-        }
-        
-        .date-dropdowns {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .quarter-highlight {
-            background: linear-gradient(to right, #f0f7ff, #f8fbff);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .quarter-highlight h3 {
-            margin-top: 0;
-            color: var(--primary);
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-        
-        .quarter-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .quarter-tag {
-            background: rgba(58, 123, 213, 0.1);
-            color: var(--primary);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .chart-type-info {
-            margin-top: 15px;
-            padding: 12px;
-            background: #f9f9ff;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #666;
-            border-left: 3px solid var(--secondary);
-        }
-        
-        @media (max-width: 768px) {
-            .input-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .date-dropdowns {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            button {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-        }
 
-        
-        /* Additional style for the loading spinner in dropdown */
-        select:focus{
-               background: rgba(255,255,255,0.25);
-        }
-        select option {
-    background: lightblue;
-    color: #333;
-}
+        /* Spinner */
         .spinner {
             border: 2px solid #f3f3f3;
-            border-top: 2px solid #3a7bd5;
+            border-top: 2px solid var(--primary);
             border-radius: 50%;
             width: 16px;
             height: 16px;
             animation: spin 1s linear infinite;
             display: inline-block;
             margin-left: 10px;
-            text-decoration-color: #00d2ff;
-            
-            /*background-color: lightblue; */
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Quarter tags */
+        .quarter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .quarter-tag {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ... (truncated for brevity) ... */
+
+        /* Quarter indicators on x-axis */
+        .quarter-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 20px;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-top: 2px solid var(--primary);
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Budget Time Series Analysis</h1>
-        <p>Track expenditure patterns, budget utilization, and category performance across multiple quarters</p>
-        
-        <div class="input-container">
-            <div class="input-group">
-                <label for="budgetId">Select Budget</label>
-                <select id="budgetId">
-                    <option value="">Loading budgets...</option>
-                </select>
-                <div id="budgetLoading" class="spinner" style="display: inline-block; margin-left: 10px;"></div>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-chart-pie"></i>
+                <h1>BudgetVision</h1>
             </div>
-            <div class="date-dropdowns">
-                <div class="input-group">
-                    <label for="startDate">Start Date</label>
-                    <input type="date" id="startDate" value="2023-01-01">
+            <div class="nav-menu">
+                <div class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
                 </div>
-                <div class="input-group">
-                    <label for="endDate">End Date</label>
-                    <input type="date" id="endDate" value="2023-12-31">
+                <div class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Budgets</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>History</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
                 </div>
             </div>
-            <button onclick="fetchBudgetData()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                Generate Report
-            </button>
         </div>
-    </div>
-    
-    <div id="dashboard" class="dashboard">
-        <div class="loading" id="loadingMessage">Select a budget and date range to generate report</div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-title">
+                    <h2>Budget Analytics Dashboard</h2>
+                    <p>Track expenditure patterns and budget utilization</p>
+                </div>
+                <div class="header-actions">
+                    <div class="header-action-btn">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="header-action-btn">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="header-action-btn">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">Budget</label>
+                        <select id="budgetId" class="input-field">
+                            <option value="">Loading budgets...</option>
+                        </select>
+                        <div id="budgetLoading" class="spinner" style="display: inline-block; margin-left: 10px;"></div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Start Date</label>
+                        <input type="date" id="startDate" class="input-field" value="2023-01-01">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">End Date</label>
+                        <input type="date" id="endDate" class="input-field" value="2023-12-31">
+                    </div>
+                </div>
+                <button class="generate-btn" onclick="fetchBudgetData()">
+                    <i class="fas fa-sync-alt"></i>
+                    Generate Report
+                </button>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="dashboard-grid" id="metricsGrid">
+                <div class="loading" id="loadingMessage">Select a budget and date range to generate report</div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <div class="section-header">
+                    <div class="section-title">Expenditure Timeline</div>
+                    <div class="section-actions">
+                        <div class="toggle-container">
+                            <span class="toggle-text">Line</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chartTypeToggle">
+                                <span class="slider"></span>
+                            </label>
+                            <span class="toggle-text">Curve</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="time-series-chart"></canvas>
+                    <div id="quarterIndicators"></div>
+                </div>
+                <div class="quarter-tags" id="quarterTags"></div>
+            </div>
+
+            <!-- Category Analysis -->
+            <div class="chart-section">
+                <div class="section-header">
+                    <div class="section-title">Category Analysis</div>
+                </div>
+                <div id="categoryAnalysisContent">
+                    <!-- Category analysis table will be inserted here -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -454,6 +715,7 @@
         let budgetData = null;
         let currentBudgetId = null;
         let chartType = 'curve'; // 'line' or 'curve'
+        let currentChart = null;
         
         // Helper function to format currency
         function formatCurrency(value) {
@@ -467,8 +729,8 @@
         
         // Helper function to show error messages
         function showError(message) {
-            const dashboard = document.getElementById('dashboard');
-            dashboard.innerHTML = `<div class="error-message">${message}</div>`;
+            const metricsGrid = document.getElementById('metricsGrid');
+            metricsGrid.innerHTML = `<div class="error-message">${message}</div>`;
         }
         
         // Fetch all budgets from the server
@@ -515,6 +777,7 @@
             } catch (error) {
                 console.error("Error fetching budgets:", error);
                 budgetSelect.innerHTML = '<option value="">Error loading budgets</option>';
+                showError(`Failed to fetch budgets: ${error.message}. Please ensure the API server is running.`);
             } finally {
                 budgetLoading.style.display = 'none';
             }
@@ -544,8 +807,8 @@
             }
             
             currentBudgetId = budgetId;
-            const dashboard = document.getElementById('dashboard');
-            dashboard.innerHTML = '<div class="loading">Loading budget data...</div>';
+            const metricsGrid = document.getElementById('metricsGrid');
+            metricsGrid.innerHTML = '<div class="loading">Loading budget data...</div>';
             
             try {
                 // Fetch data from API endpoint using POST
@@ -579,7 +842,6 @@
             }
         }
         
-        // ... (rest of the JavaScript code remains the same) ...
         function processAndRenderChart(startDate, endDate) {
             if (!budgetData) {
                 showError("No budget data available.");
@@ -596,14 +858,19 @@
             let allAmounts = [];
             let quarterInfo = {};
             
+            // Create a mapping of quarter IDs to their data
+            const quarterMap = {};
             for (const [qId, qData] of Object.entries(budgetData)) {
+                if (qId === 'status') continue; // Skip status field
+                
+                quarterMap[qId] = qData;
                 const quarterStart = new Date(qData.quarterStartDate);
                 const quarterEnd = new Date(qData.quarterEndDate);
                 
                 // Check if quarter overlaps with selected date range
                 if ((quarterStart <= endDateObj && quarterEnd >= startDateObj)) {
                     // Create quarter label
-                    const quarterLabel = `${qData.quarterStartDate} to ${qData.quarterEndDate}`;
+                    const quarterLabel = `${formatDateDisplay(qData.quarterStartDate)} to ${formatDateDisplay(qData.quarterEndDate)}`;
                     
                     // Add to quartersInRange with proper labels
                     quartersInRange.push({
@@ -615,17 +882,16 @@
                     });
                     
                     // Process dates and amounts for this quarter
-                    qData.datesOfExpense.forEach((date, index) => {
-                        const expenseDate = new Date(date);
-                        if (expenseDate >= startDateObj && expenseDate <= endDateObj) {
-                            allDates.push(date);
-                            allAmounts.push(qData.amountsSpent[index]);
-                            quarterInfo[date] = { 
-                                quarterId: qId, 
-                                quarterLabel: quarterLabel 
-                            };
-                        }
-                    });
+                    if (qData.datesOfExpense && qData.amountsSpent) {
+                        qData.datesOfExpense.forEach((date, index) => {
+                            const expenseDate = new Date(date);
+                            if (expenseDate >= startDateObj && expenseDate <= endDateObj) {
+                                allDates.push(date);
+                                allAmounts.push(qData.amountsSpent[index]);
+                                quarterInfo[date] = qId; // Store quarter ID for this date
+                            }
+                        });
+                    }
                 }
             }
             
@@ -642,19 +908,26 @@
                 
             const sortedDates = sortedIndices.map(i => allDates[i]);
             const sortedAmounts = sortedIndices.map(i => allAmounts[i]);
+            const sortedQuarterIds = sortedIndices.map(i => quarterInfo[allDates[i]]);
             
-            // Prepare quarter labels for each data point
-            const quarterLabels = sortedDates.map(date => quarterInfo[date]?.quarterLabel || 'Unknown');
-            const quarterIds = sortedDates.map(date => quarterInfo[date]?.quarterId || 'unknown');
+            // Get unique quarter IDs for legend
+            const uniqueQuarterIds = [...new Set(sortedQuarterIds)];
             
-            // Get unique quarter labels for legend - use the quartersInRange to get all quarters
-            const uniqueQuarterLabels = [...new Set(quartersInRange.map(q => q.quarterLabel))];
+            // Get the actual date range from the data (not from input)
+            let actualStartDate = sortedDates.length > 0 ? sortedDates[0] : startDate;
+            let actualEndDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : endDate;
             
             // Render the chart
-            renderTimeSeriesChart(sortedDates, sortedAmounts, quarterLabels, quarterIds, uniqueQuarterLabels, quartersInRange);
+            renderTimeSeriesChart(sortedDates, sortedAmounts, sortedQuarterIds, uniqueQuarterIds, quartersInRange, actualStartDate, actualEndDate);
             
             // Render metrics and category comparison
             renderMetricsAndComparison(quartersInRange);
+        }
+        
+        // Format date for display (MMM DD, YYYY)
+        function formatDateDisplay(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
         
         // Create gradient for chart background
@@ -667,64 +940,13 @@
         }
         
         // Render the time series chart
-        function renderTimeSeriesChart(dates, amounts, quarterLabels, quarterIds, uniqueQuarterLabels, quartersInRange) {
-            const dashboard = document.getElementById('dashboard');
-            dashboard.innerHTML = '';
+        function renderTimeSeriesChart(dates, amounts, quarterIds, uniqueQuarterIds, quartersInRange, startDate, endDate) {
+            const metricsGrid = document.getElementById('metricsGrid');
+            metricsGrid.innerHTML = '';
             
-            // Create main card
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            // Card header
-            const cardHeader = document.createElement('div');
-            cardHeader.className = 'card-header';
-            cardHeader.innerHTML = `
-                <h2 class="card-title">Budget Expenditure Timeline</h2>
-                <div class="chart-toggle">
-                    <button id="lineBtn" class="${chartType === 'line' ? 'active' : ''}" onclick="setChartType('line')">Line Chart</button>
-                    <button id="curveBtn" class="${chartType === 'curve' ? 'active' : ''}" onclick="setChartType('curve')">Curve Chart</button>
-                </div>
-            `;
-            card.appendChild(cardHeader);
-            
-            // Date range info
-            const dateInfo = document.createElement('div');
-            dateInfo.className = 'quarter-highlight';
-            dateInfo.innerHTML = `
-                <h3>Selected Date Range</h3>
-                <div>${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}</div>
-            `;
-            card.appendChild(dateInfo);
-            
-            // Quarter highlights
-            const highlightSection = document.createElement('div');
-            highlightSection.className = 'quarter-highlight';
-            highlightSection.innerHTML = `
-                <h3>Quarters in Selected Range</h3>
-                <div class="quarter-tags" id="quarterTags"></div>
-            `;
-            card.appendChild(highlightSection);
-            
-            // Chart info
-            const chartInfo = document.createElement('div');
-            chartInfo.className = 'chart-type-info';
-            chartInfo.innerHTML = chartType === 'curve' 
-                ? 'Curved lines show expenditure trends with gradient-filled areas representing budget utilization over time.' 
-                : 'Straight lines connect expenditure points with gradient-filled areas highlighting budget utilization patterns.';
-            card.appendChild(chartInfo);
-            
-            // Create chart container
-            const chartContainer = document.createElement('div');
-            chartContainer.className = 'chart-container';
-            const chartCanvas = document.createElement('canvas');
-            chartCanvas.id = 'time-series-chart';
-            chartContainer.appendChild(chartCanvas);
-            card.appendChild(chartContainer);
-            
-            dashboard.appendChild(card);
-            
-            // Create quarter tags - show all quarters in range, not just those with data points
+            // Update quarter tags
             const quarterTags = document.getElementById('quarterTags');
+            quarterTags.innerHTML = '';
             quartersInRange.forEach(quarter => {
                 const tag = document.createElement('div');
                 tag.className = 'quarter-tag';
@@ -735,51 +957,87 @@
             // Create chart
             const ctx = document.getElementById('time-series-chart').getContext('2d');
             
+            // Destroy previous chart if it exists
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
             // Generate distinct colors for each quarter
             const colors = [
-                {start: '#4e79a7', end: '#3a6186'}, 
-                {start: '#f28e2b', end: '#d67d25'}, 
-                {start: '#59a14f', end: '#4a8a41'}, 
-                {start: '#e15759', end: '#c44a4c'}, 
-                {start: '#76b7b2', end: '#5f9c98'}, 
-                {start: '#edc948', end: '#d8b640'},
-                {start: '#af7aa1', end: '#8c5b7b'},
-                {start: '#ff9da7', end: '#d87a84'},
-                {start: '#9c755f', end: '#7d5e4b'},
-                {start: '#bab0ac', end: '#958c89'}
+                {start: '#4361ee', end: '#3a0ca3'}, 
+                {start: '#f72585', end: '#b5179e'}, 
+                {start: '#4cc9f0', end: '#4895ef'}, 
+                {start: '#560bad', end: '#7209b7'},
+                {start: '#3a0ca3', end: '#480ca8'},
+                {start: '#f77f00', end: '#d62828'}
             ];
             
-            // Create a dataset for each unique quarter
-            const datasets = uniqueQuarterLabels.map((label, index) => {
-                const color = colors[index % colors.length];
-                return {
-                    label: label,
-                    data: dates.map((date, i) => {
-                        return quarterLabels[i] === label ? amounts[i] : null;
-                    }),
-                    backgroundColor: function(context) {
-                        const chart = context.chart;
-                        const {ctx, chartArea} = chart;
-                        if (!chartArea) return color.start + '40';
-                        return createGradient(ctx, chartArea, color.start, color.end);
-                    },
-                    borderColor: color.start,
-                    borderWidth: 3,
-                    pointBackgroundColor: color.start,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    tension: chartType === 'curve' ? 0.4 : 0,
-                    fill: true
-                };
-            });
+            // Create a single dataset with all data points
+            const dataPoints = dates.map((date, i) => ({
+                x: new Date(date),
+                y: amounts[i],
+                quarterId: quarterIds[i]
+            }));
             
-            new Chart(ctx, {
+            // Create dataset with segment styling
+            const dataset = {
+                label: 'Expenditure',
+                data: dataPoints,
+                borderColor: function(context) {
+                    const index = context.dataIndex;
+                    if (index === undefined || index === null) return '#4361ee';
+                    const quarterId = dataPoints[index].quarterId;
+                    const quarterIndex = uniqueQuarterIds.indexOf(quarterId);
+                    return colors[quarterIndex % colors.length].start;
+                },
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    if (!chartArea) return '#4361ee40';
+                    
+                    const index = context.dataIndex;
+                    if (index === undefined || index === null) return '#4361ee40';
+                    
+                    const quarterId = dataPoints[index].quarterId;
+                    const quarterIndex = uniqueQuarterIds.indexOf(quarterId);
+                    return createGradient(ctx, chartArea, colors[quarterIndex % colors.length].start, colors[quarterIndex % colors.length].end);
+                },
+                segment: {
+                    borderColor: ctx => {
+                        const currentPoint = dataPoints[ctx.p0DataIndex];
+                        const quarterIndex = uniqueQuarterIds.indexOf(currentPoint.quarterId);
+                        return colors[quarterIndex % colors.length].start;
+                    },
+                    backgroundColor: ctx => {
+                        const chart = ctx.chart;
+                        const {ctx: chartCtx, chartArea} = chart;
+                        if (!chartArea) return '#4361ee40';
+                        
+                        const currentPoint = dataPoints[ctx.p0DataIndex];
+                        const quarterIndex = uniqueQuarterIds.indexOf(currentPoint.quarterId);
+                        return createGradient(chartCtx, chartArea, colors[quarterIndex % colors.length].start, colors[quarterIndex % colors.length].end);
+                    }
+                },
+                borderWidth: 3,
+                pointBackgroundColor: function(context) {
+                    const index = context.dataIndex;
+                    if (index === undefined || index === null) return '#4361ee';
+                    const quarterId = dataPoints[index].quarterId;
+                    const quarterIndex = uniqueQuarterIds.indexOf(quarterId);
+                    return colors[quarterIndex % colors.length].start;
+                },
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                tension: chartType === 'curve' ? 0.4 : 0,
+                fill: true
+            };
+            
+            currentChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dates,
-                    datasets: datasets
+                    datasets: [dataset]
                 },
                 options: {
                     responsive: true,
@@ -795,7 +1053,8 @@
                                 display: true,
                                 text: 'Amount (UGX)',
                                 font: {
-                                    weight: 'bold'
+                                    weight: 'bold',
+                                    size: 14
                                 }
                             },
                             ticks: {
@@ -811,11 +1070,22 @@
                             }
                         },
                         x: {
+                            type: 'time',
+                            time: {
+                                unit: 'month',
+                                displayFormats: {
+                                    month: 'MMM yyyy'
+                                },
+                                tooltipFormat: 'yyyy-MM-dd'
+                            },
+                            min: new Date(startDate),
+                            max: new Date(endDate),
                             title: {
                                 display: true,
                                 text: 'Date of Expense',
                                 font: {
-                                    weight: 'bold'
+                                    weight: 'bold',
+                                    size: 14
                                 }
                             },
                             grid: {
@@ -823,7 +1093,10 @@
                             },
                             ticks: {
                                 maxRotation: 45,
-                                minRotation: 45
+                                minRotation: 45,
+                                font: {
+                                    size: 12
+                                }
                             }
                         }
                     },
@@ -831,9 +1104,12 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const label = context.dataset.label || '';
-                                    const value = context.raw || 0;
-                                    return `${label}: ${formatCurrency(value)}`;
+                                    const value = context.raw.y || 0;
+                                    const date = new Date(context.raw.x);
+                                    const quarterId = dataPoints[context.dataIndex].quarterId;
+                                    const quarterData = budgetData[quarterId];
+                                    const quarterLabel = `${formatDateDisplay(quarterData.quarterStartDate)} to ${formatDateDisplay(quarterData.quarterEndDate)}`;
+                                    return `${quarterLabel}: ${formatCurrency(value)}`;
                                 }
                             },
                             backgroundColor: 'rgba(255,255,255,0.9)',
@@ -845,16 +1121,7 @@
                             boxPadding: 6
                         },
                         legend: {
-                            position: 'top',
-                            labels: {
-                                boxWidth: 15,
-                                padding: 20,
-                                font: {
-                                    size: 13
-                                },
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
+                            display: false
                         }
                     },
                     animation: {
@@ -863,23 +1130,65 @@
                     }
                 }
             });
+            
+            // Add quarter indicators after chart is rendered
+            setTimeout(() => {
+                addQuarterIndicators(quartersInRange, startDate, endDate);
+            }, 500);
         }
         
+        // Add visual indicators for quarters on the x-axis
+        function addQuarterIndicators(quartersInRange, startDate, endDate) {
+            if (!currentChart) return;
+            
+            const chartArea = currentChart.chartArea;
+            const xAxis = currentChart.scales.x;
+            const quarterIndicators = document.getElementById('quarterIndicators');
+            quarterIndicators.innerHTML = '';
+            
+            const startDateMs = new Date(startDate).getTime();
+            const endDateMs = new Date(endDate).getTime();
+            const totalDateRange = endDateMs - startDateMs;
+            
+            quartersInRange.forEach(quarter => {
+                const quarterStart = new Date(quarter.startDate).getTime();
+                const quarterEnd = new Date(quarter.endDate).getTime();
+                
+                // Calculate the position and width of the quarter indicator
+                const left = Math.max(0, (quarterStart - startDateMs) / totalDateRange) * chartArea.width + chartArea.left;
+                const right = Math.min(1, (quarterEnd - startDateMs) / totalDateRange) * chartArea.width + chartArea.left;
+                const width = right - left;
+                
+                if (width > 0) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'quarter-indicator';
+                    indicator.style.left = `${left}px`;
+                    indicator.style.width = `${width}px`;
+                    quarterIndicators.appendChild(indicator);
+                }
+            });
+        }
+
         // Set chart type and re-render
         function setChartType(type) {
             chartType = type;
-            document.getElementById('lineBtn').classList.toggle('active', type === 'line');
-            document.getElementById('curveBtn').classList.toggle('active', type === 'curve');
+            
+            // Update toggle switch
+            const toggle = document.getElementById('chartTypeToggle');
+            toggle.checked = type === 'curve';
             
             // Re-render chart with current data
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-            processAndRenderChart(startDate, endDate);
+            if (budgetData) {
+                processAndRenderChart(startDate, endDate);
+            }
         }
         
         // Render metrics and category comparison
         function renderMetricsAndComparison(quartersInRange) {
-            const dashboard = document.getElementById('dashboard');
+            const metricsGrid = document.getElementById('metricsGrid');
+            const categoryAnalysisContent = document.getElementById('categoryAnalysisContent');
             
             // Calculate totals across all quarters in range
             let totalPlanned = 0;
@@ -907,137 +1216,115 @@
             // Calculate variance
             const variance = totalPlanned - totalExpended;
             
-            // Create metrics card
-            const metricsCard = document.createElement('div');
-            metricsCard.className = 'card';
-            
-            metricsCard.innerHTML = `
-                <div class="card-header">
-                    <h2 class="card-title">Budget Performance Summary</h2>
-                </div>
-            `;
-            
-            const metricsGrid = document.createElement('div');
-            metricsGrid.className = 'metrics-grid';
+            // Create metrics cards
             metricsGrid.innerHTML = `
-                <div class="metric">
-                    <div class="metric-label">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3a7bd5" stroke-width="2">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                        </svg>
-                        Total Planned
-                    </div>
-                    <div class="metric-value">${formatCurrency(totalPlanned)}</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d2ff" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Total Expended
-                    </div>
-                    <div class="metric-value">${formatCurrency(totalExpended)}</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        Utilization
-                    </div>
-                    <div class="metric-value">
-                        ${utilizationPercentage.toFixed(2)}%
-                        <div class="badge ${utilizationPercentage > 100 ? 'negative' : 'positive'}">
-                            ${utilizationPercentage > 100 ? 'Over Budget' : 'Under Budget'}
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">TOTAL BUDGET</div>
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-wallet"></i>
                         </div>
                     </div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9800" stroke-width="2">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                        </svg>
-                        Variance
+                    <div class="stat-value">${formatCurrency(totalPlanned)}</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Budget allocation</span>
                     </div>
-                    <div class="metric-value">
-                        ${formatCurrency(variance)}
-                        <div class="badge ${variance < 0 ? 'negative' : 'positive'}">
-                            ${variance < 0 ? 'Overspent' : 'Under Budget'}
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">EXPENDITURE</div>
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-money-bill-wave"></i>
                         </div>
+                    </div>
+                    <div class="stat-value">${formatCurrency(totalExpended)}</div>
+                    <div class="stat-change ${totalExpended < totalPlanned ? 'positive' : 'negative'}">
+                        <i class="fas ${totalExpended < totalPlanned ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                        <span>${totalExpended < totalPlanned ? 'Under budget' : 'Over budget'}</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">UTILIZATION</div>
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">${utilizationPercentage.toFixed(2)}%</div>
+                    <div class="stat-change ${utilizationPercentage > 100 ? 'negative' : 'positive'}">
+                        <i class="fas ${utilizationPercentage > 100 ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                        <span>${utilizationPercentage > 100 ? 'Over Budget' : 'On Track'}</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">VARIANCE</div>
+                        <div class="stat-icon bg-info">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">${formatCurrency(variance)}</div>
+                    <div class="stat-change ${variance >= 0 ? 'positive' : 'negative'}">
+                        <i class="fas ${variance >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                        <span>${variance >= 0 ? 'Savings' : 'Overspend'}</span>
                     </div>
                 </div>
             `;
-            
-            metricsCard.appendChild(metricsGrid);
-            dashboard.appendChild(metricsCard);
             
             // Create category comparison table if we have category data
             if (Object.keys(categoryAnalysis).length > 0) {
-                const comparisonCard = document.createElement('div');
-                comparisonCard.className = 'card';
-                comparisonCard.innerHTML = `
-                    <div class="card-header">
-                        <h2 class="card-title">Category Analysis</h2>
-                    </div>
+                let tableHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Planned</th>
+                                <th>Actual</th>
+                                <th>Variance</th>
+                                <th>Utilization</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
                 
-                const table = document.createElement('table');
-                table.className = 'comparison-table';
-                
-                // Table header
-                const thead = document.createElement('thead');
-                thead.innerHTML = `
-                    <tr>
-                        <th>Category</th>
-                        <th>Planned</th>
-                        <th>Actual</th>
-                        <th>Variance</th>
-                        <th>Utilization</th>
-                    </tr>
-                `;
-                table.appendChild(thead);
-                
-                // Table body
-                const tbody = document.createElement('tbody');
                 for (const [category, data] of Object.entries(categoryAnalysis)) {
                     const variance = data.planned - data.actual;
                     const varianceClass = variance >= 0 ? 'positive' : 'negative';
                     const utilization = data.planned > 0 ? (data.actual / data.planned) * 100 : 0;
                     
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${category}</td>
-                        <td>${formatCurrency(data.planned)}</td>
-                        <td>${formatCurrency(data.actual)}</td>
-                        <td><span class="badge ${varianceClass}">${formatCurrency(variance)}</span></td>
-                        <td>${utilization.toFixed(2)}%</td>
+                    tableHTML += `
+                        <tr>
+                            <td>${category}</td>
+                            <td>${formatCurrency(data.planned)}</td>
+                            <td>${formatCurrency(data.actual)}</td>
+                            <td><span class="badge ${varianceClass}">${formatCurrency(variance)}</span></td>
+                            <td>${utilization.toFixed(2)}%</td>
+                        </tr>
                     `;
-                    tbody.appendChild(row);
                 }
                 
                 // Add total row
-                const totalRow = document.createElement('tr');
-                totalRow.style.fontWeight = 'bold';
-                totalRow.innerHTML = `
-                    <td>Total</td>
-                    <td>${formatCurrency(totalPlanned)}</td>
-                    <td>${formatCurrency(totalExpended)}</td>
-                    <td><span class="badge ${variance >= 0 ? 'positive' : 'negative'}">${formatCurrency(variance)}</span></td>
-                    <td>${utilizationPercentage.toFixed(2)}%</td>
+                tableHTML += `
+                    <tr style="font-weight: bold;">
+                        <td>Total</td>
+                        <td>${formatCurrency(totalPlanned)}</td>
+                        <td>${formatCurrency(totalExpended)}</td>
+                        <td><span class="badge ${variance >= 0 ? 'positive' : 'negative'}">${formatCurrency(variance)}</span></td>
+                        <td>${utilizationPercentage.toFixed(2)}%</td>
+                    </tr>
                 `;
-                tbody.appendChild(totalRow);
                 
-                table.appendChild(tbody);
-                comparisonCard.appendChild(table);
-                dashboard.appendChild(comparisonCard);
+                tableHTML += `</tbody></table>`;
+                categoryAnalysisContent.innerHTML = tableHTML;
+            } else {
+                categoryAnalysisContent.innerHTML = '<div class="loading">No category data available</div>';
             }
         }
         
-        
-       
         // Initialize by fetching budgets
         window.onload = function() {
             // Set default dates
@@ -1045,6 +1332,13 @@
             const lastYear = new Date(today.getFullYear() - 1, 0, 1);
             document.getElementById('startDate').valueAsDate = lastYear;
             document.getElementById('endDate').valueAsDate = today;
+            
+            // Set up chart type toggle
+            const chartTypeToggle = document.getElementById('chartTypeToggle');
+            chartTypeToggle.checked = chartType === 'curve';
+            chartTypeToggle.addEventListener('change', function() {
+                setChartType(this.checked ? 'curve' : 'line');
+            });
             
             // Fetch budgets for the dropdown
             fetchBudgets();

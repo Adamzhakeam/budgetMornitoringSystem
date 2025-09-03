@@ -405,6 +405,10 @@
             .section-actions {
                 flex-wrap: wrap;
             }
+            
+            .charts-container {
+                flex-direction: column;
+            }
         }
 
         /* Animation for cards */
@@ -574,6 +578,33 @@
             font-size: 14px;
             font-weight: 500;
         }
+
+        /* Charts container for pie charts */
+        .charts-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .chart-wrapper {
+            flex: 1;
+            min-width: 300px;
+            height: 350px;
+            position: relative;
+        }
+        
+        .chart-wrapper h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: var(--gray-700);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
     </style>
 </head>
 <body>
@@ -659,25 +690,31 @@
                 <div class="loading" id="loadingMessage">Select a budget and date range to generate report</div>
             </div>
 
-            <!-- Chart Section -->
+            <!-- Pie Charts Section -->
             <div class="chart-section">
                 <div class="section-header">
-                    <div class="section-title">Expenditure Timeline</div>
-                    <div class="section-actions">
-                        <div class="toggle-container">
-                            <span class="toggle-text">Line</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="chartTypeToggle">
-                                <span class="slider"></span>
-                            </label>
-                            <span class="toggle-text">Curve</span>
-                        </div>
+                    <div class="section-title">Budget Allocation Analysis</div>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Budget Categories</h3>
+                        <canvas id="category-pie-chart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Budget Items</h3>
+                        <canvas id="item-pie-chart"></canvas>
                     </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="time-series-chart"></canvas>
+            </div>
+
+            <!-- Category Trend Chart Section -->
+            <div class="chart-section">
+                <div class="section-header">
+                    <div class="section-title">Category Trends Over Time</div>
                 </div>
-                <div class="quarter-tags" id="quarterTags"></div>
+                <div class="chart-container">
+                    <canvas id="category-trend-chart"></canvas>
+                </div>
             </div>
 
             <!-- Category Analysis -->
@@ -699,8 +736,10 @@
         // Store the budget data
         let budgetData = null;
         let currentBudgetId = null;
-        let chartType = 'curve'; // 'line' or 'curve'
         let currentChart = null;
+        let categoryPieChart = null;
+        let itemPieChart = null;
+        let categoryTrendChart = null;
         
         // Helper function to format currency
         function formatCurrency(value) {
@@ -716,6 +755,40 @@
         function showError(message) {
             const metricsGrid = document.getElementById('metricsGrid');
             metricsGrid.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+        
+        // Generate a color scheme based on category names
+        function generateColorScheme(categories) {
+            const baseColors = [
+                '#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2',
+                '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
+                '#4361ee', '#f72585', '#4cc9f0', '#3a0ca3', '#7209b7'
+            ];
+            
+            const scheme = {};
+            categories.forEach((category, index) => {
+                const baseColor = baseColors[index % baseColors.length];
+                scheme[category] = [
+                    baseColor,
+                    lightenColor(baseColor, 30),
+                    lightenColor(baseColor, 60)
+                ];
+            });
+            return scheme;
+        }
+
+        // Helper function to lighten a color
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (
+                0x1000000 + (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+                (B < 255 ? (B < 1 ? 0 : B) : 255)
+            ).toString(16).slice(1);
         }
         
         // Fetch all budgets from the server
@@ -819,15 +892,15 @@
                 // Use the response data directly
                 budgetData = responseData;
                 
-                // Process the data and render the chart
-                processAndRenderChart(startDate, endDate);
+                // Process the data and render the charts
+                processAndRenderCharts(startDate, endDate);
             } catch (error) {
                 console.error("Error fetching budget data:", error);
                 showError(`Failed to fetch data: ${error.message}. Please ensure the API server is running.`);
             }
         }
         
-        function processAndRenderChart(startDate, endDate) {
+        function processAndRenderCharts(startDate, endDate) {
             if (!budgetData) {
                 showError("No budget data available.");
                 return;
@@ -842,10 +915,13 @@
             let allDates = [];
             let allAmounts = [];
             let quarterInfo = {};
+            let categoryData = {};
             
             // Create a mapping of quarter IDs to their data
             const quarterMap = {};
             for (const [qId, qData] of Object.entries(budgetData)) {
+                if (qId === 'status') continue; // Skip status field
+                
                 quarterMap[qId] = qData;
                 const quarterStart = new Date(qData.quarterStartDate);
                 const quarterEnd = new Date(qData.quarterEndDate);
@@ -853,7 +929,7 @@
                 // Check if quarter overlaps with selected date range
                 if ((quarterStart <= endDateObj && quarterEnd >= startDateObj)) {
                     // Create quarter label
-                    const quarterLabel = `${qData.quarterStartDate} to ${qData.quarterEndDate}`;
+                    const quarterLabel = `${formatDateDisplay(qData.quarterStartDate)} to ${formatDateDisplay(qData.quarterEndDate)}`;
                     
                     // Add to quartersInRange with proper labels
                     quartersInRange.push({
@@ -874,6 +950,35 @@
                                 quarterInfo[date] = qId; // Store quarter ID for this date
                             }
                         });
+                    }
+                    
+                    // Aggregate category data
+                    if (qData.category_analysis) {
+                        for (const [category, data] of Object.entries(qData.category_analysis)) {
+                            if (!categoryData[category]) {
+                                categoryData[category] = {
+                                    actual: 0,
+                                    planned: 0,
+                                    items: {}
+                                };
+                            }
+                            categoryData[category].actual += data.actual || 0;
+                            categoryData[category].planned += data.planned || 0;
+                            
+                            // Aggregate item data
+                            if (data.items) {
+                                for (const [item, itemData] of Object.entries(data.items)) {
+                                    if (!categoryData[category].items[item]) {
+                                        categoryData[category].items[item] = {
+                                            actual: 0,
+                                            planned: 0
+                                        };
+                                    }
+                                    categoryData[category].items[item].actual += itemData.actual || 0;
+                                    categoryData[category].items[item].planned += itemData.planned || 0;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -896,96 +1001,214 @@
             // Get unique quarter IDs for legend
             const uniqueQuarterIds = [...new Set(sortedQuarterIds)];
             
-            // Render the chart
-            renderTimeSeriesChart(sortedDates, sortedAmounts, sortedQuarterIds, uniqueQuarterIds, quartersInRange, startDate, endDate);
+            // Get the actual date range from the data (not from input)
+            let actualStartDate = sortedDates.length > 0 ? sortedDates[0] : startDate;
+            let actualEndDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : endDate;
+            
+            // Render the charts
+            renderPieCharts(categoryData);
+            renderCategoryTrendChart(quartersInRange, categoryData);
             
             // Render metrics and category comparison
             renderMetricsAndComparison(quartersInRange);
         }
         
-        // Create gradient for chart background
-        function createGradient(ctx, area, startColor, endColor) {
-            const gradient = ctx.createLinearGradient(0, area.bottom, 0, area.top);
-            gradient.addColorStop(0, startColor + '00'); // Transparent at bottom
-            gradient.addColorStop(0.7, startColor + '80'); // Semi-transparent in middle
-            gradient.addColorStop(1, startColor + '40'); // More transparent at top
-            return gradient;
+        // Format date for display (MMM DD, YYYY)
+        function formatDateDisplay(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
         
-        // Render the time series chart
-        function renderTimeSeriesChart(dates, amounts, quarterIds, uniqueQuarterIds, quartersInRange, startDate, endDate) {
-            const metricsGrid = document.getElementById('metricsGrid');
-            metricsGrid.innerHTML = '';
-            
-            // Update quarter tags
-            const quarterTags = document.getElementById('quarterTags');
-            quarterTags.innerHTML = '';
-            quartersInRange.forEach(quarter => {
-                const tag = document.createElement('div');
-                tag.className = 'quarter-tag';
-                tag.textContent = quarter.quarterLabel;
-                quarterTags.appendChild(tag);
-            });
-            
-            // Create chart
-            const ctx = document.getElementById('time-series-chart').getContext('2d');
-            
-            // Destroy previous chart if it exists
-            if (currentChart) {
-                currentChart.destroy();
+        // Render the pie charts
+        function renderPieCharts(categoryData) {
+            // Destroy previous charts if they exist
+            if (categoryPieChart) {
+                categoryPieChart.destroy();
+            }
+            if (itemPieChart) {
+                itemPieChart.destroy();
             }
             
-            // Generate distinct colors for each quarter
-            const colors = [
-                {start: '#4361ee', end: '#3a0ca3'}, 
-                {start: '#f72585', end: '#b5179e'}, 
-                {start: '#4cc9f0', end: '#4895ef'}, 
-                {start: '#560bad', end: '#7209b7'},
-                {start: '#3a0ca3', end: '#480ca8'},
-                {start: '#f77f00', end: '#d62828'}
-            ];
+            const categories = Object.keys(categoryData);
+            const colorScheme = generateColorScheme(categories);
             
-            // Create a dataset for each unique quarter
-            const datasets = uniqueQuarterIds.map((qId, index) => {
-                const quarterData = budgetData[qId];
-                const quarterLabel = `${quarterData.quarterStartDate} to ${quarterData.quarterEndDate}`;
-                const color = colors[index % colors.length];
-                
-                // Create data points for this quarter
-                const dataPoints = [];
-                dates.forEach((date, i) => {
-                    if (quarterIds[i] === qId) {
-                        dataPoints.push({
-                            x: new Date(date),
-                            y: amounts[i]
-                        });
+            // Prepare data for Category Pie Chart
+            const categoryLabels = categories;
+            const categoryChartData = categories.map(cat => categoryData[cat].actual || 0);
+            const categoryColors = categories.map(cat => colorScheme[cat]?.[0] || '#cccccc');
+            const categoryTotal = categoryChartData.reduce((a, b) => a + b, 0);
+            
+            // Create Category Pie Chart
+            const categoryCtx = document.getElementById('category-pie-chart').getContext('2d');
+            categoryPieChart = new Chart(categoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: categoryChartData,
+                        backgroundColor: categoryColors,
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = categoryTotal > 0 ? Math.round((value / categoryTotal) * 100) : 0;
+                                    const variance = categoryData[label]?.planned - value || 0;
+                                    return [
+                                        `${label}`,
+                                        `Amount: ${formatCurrency(value)}`,
+                                        `Percentage: ${percentage}%`,
+                                        `Variance: ${formatCurrency(variance)}`
+                                    ];
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, context) => {
+                                const percentage = categoryTotal > 0 ? Math.round((value / categoryTotal) * 100) : 0;
+                                return percentage >= 5 ? `${percentage}%` : '';
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
                     }
+                },
+                plugins: [ChartDataLabels]
+            });
+            
+            // Prepare data for Items Pie Chart
+            const itemLabels = [];
+            const itemChartData = [];
+            const itemColors = [];
+            
+            categories.forEach(category => {
+                const items = categoryData[category].items || {};
+                
+                Object.entries(items).forEach(([itemName, itemDataObj]) => {
+                    itemLabels.push(`${itemName} (${category})`);
+                    itemChartData.push(itemDataObj.actual || 0);
+                    itemColors.push(colorScheme[category]?.[1] || '#dddddd');
+                });
+            });
+            
+            // Only create items chart if there are items
+            if (itemLabels.length > 0) {
+                const itemTotal = itemChartData.reduce((a, b) => a + b, 0);
+                const itemCtx = document.getElementById('item-pie-chart').getContext('2d');
+                
+                itemPieChart = new Chart(itemCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: itemLabels,
+                        datasets: [{
+                            data: itemChartData,
+                            backgroundColor: itemColors,
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const percentage = itemTotal > 0 ? Math.round((value / itemTotal) * 100) : 0;
+                                        return [
+                                            `${label}`,
+                                            `Amount: ${formatCurrency(value)}`,
+                                            `Percentage: ${percentage}%`
+                                        ];
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                formatter: (value, context) => {
+                                    const percentage = itemTotal > 0 ? Math.round((value / itemTotal) * 100) : 0;
+                                    return percentage >= 5 ? `${percentage}%` : '';
+                                },
+                                color: '#fff',
+                                font: {
+                                    weight: 'bold',
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            } else {
+                document.getElementById('item-pie-chart').parentElement.innerHTML = '<div class="loading">No item data available</div>';
+            }
+        }
+        
+        // Render the category trend chart
+        function renderCategoryTrendChart(quartersInRange, categoryData) {
+            if (categoryTrendChart) {
+                categoryTrendChart.destroy();
+            }
+            
+            const categories = Object.keys(categoryData);
+            const colorScheme = generateColorScheme(categories);
+            
+            // Prepare data for each category across quarters
+            const datasets = [];
+            
+            categories.forEach(category => {
+                const categorySpending = quartersInRange.map(quarter => {
+                    const quarterData = quarter.data;
+                    return quarterData.category_analysis && quarterData.category_analysis[category] 
+                        ? quarterData.category_analysis[category].actual || 0 
+                        : 0;
                 });
                 
-                return {
-                    label: quarterLabel,
-                    data: dataPoints,
-                    backgroundColor: function(context) {
-                        const chart = context.chart;
-                        const {ctx, chartArea} = chart;
-                        if (!chartArea) return color.start + '40';
-                        return createGradient(ctx, chartArea, color.start, color.end);
-                    },
-                    borderColor: color.start,
+                datasets.push({
+                    label: category,
+                    data: categorySpending,
+                    backgroundColor: colorScheme[category]?.[0] + '40',
+                    borderColor: colorScheme[category]?.[0],
                     borderWidth: 3,
-                    pointBackgroundColor: color.start,
+                    pointBackgroundColor: colorScheme[category]?.[0],
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     pointHoverRadius: 7,
-                    tension: chartType === 'curve' ? 0.4 : 0,
+                    tension: 0.4,
                     fill: true
-                };
+                });
             });
             
-            currentChart = new Chart(ctx, {
+            // Create category trend chart
+            const ctx = document.getElementById('category-trend-chart').getContext('2d');
+            categoryTrendChart = new Chart(ctx, {
                 type: 'line',
                 data: {
+                    labels: quartersInRange.map(q => `Q${q.id.replace('qId', '')}`),
                     datasets: datasets
                 },
                 options: {
@@ -1019,19 +1242,9 @@
                             }
                         },
                         x: {
-                            type: 'time',
-                            time: {
-                                unit: 'month',
-                                displayFormats: {
-                                    month: 'MMM yyyy'
-                                },
-                                tooltipFormat: 'yyyy-MM-dd'
-                            },
-                            min: new Date(startDate),
-                            max: new Date(endDate),
                             title: {
                                 display: true,
-                                text: 'Date of Expense',
+                                text: 'Quarter',
                                 font: {
                                     weight: 'bold',
                                     size: 14
@@ -1039,17 +1252,7 @@
                             },
                             grid: {
                                 display: false
-                            },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                font: {
-                                    size: 12
-                                }
-                            },
-                            // Ensure the x-axis starts exactly at the selected start date
-                            bounds: 'data',
-                            offset: false
+                            }
                         }
                     },
                     plugins: {
@@ -1057,7 +1260,7 @@
                             callbacks: {
                                 label: function(context) {
                                     const label = context.dataset.label || '';
-                                    const value = context.raw.y || 0;
+                                    const value = context.raw || 0;
                                     return `${label}: ${formatCurrency(value)}`;
                                 }
                             },
@@ -1088,22 +1291,6 @@
                     }
                 }
             });
-        }
-
-        // Set chart type and re-render
-        function setChartType(type) {
-            chartType = type;
-            
-            // Update toggle switch
-            const toggle = document.getElementById('chartTypeToggle');
-            toggle.checked = type === 'curve';
-            
-            // Re-render chart with current data
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            if (budgetData) {
-                processAndRenderChart(startDate, endDate);
-            }
         }
         
         // Render metrics and category comparison
@@ -1253,13 +1440,6 @@
             const lastYear = new Date(today.getFullYear() - 1, 0, 1);
             document.getElementById('startDate').valueAsDate = lastYear;
             document.getElementById('endDate').valueAsDate = today;
-            
-            // Set up chart type toggle
-            const chartTypeToggle = document.getElementById('chartTypeToggle');
-            chartTypeToggle.checked = chartType === 'curve';
-            chartTypeToggle.addEventListener('change', function() {
-                setChartType(this.checked ? 'curve' : 'line');
-            });
             
             // Fetch budgets for the dropdown
             fetchBudgets();
