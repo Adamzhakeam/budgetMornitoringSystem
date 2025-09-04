@@ -1,0 +1,7 @@
+/accounts/getAnyChartAccount -> Documents/projects/budgetMornitoringSystem/budgetMonitoring/a:handleSearchAnyChartAccount
+/budgets/addBudget -> Documents/projects/budgetMornitoringSystem/budgetMonitoring/a:handleAddBudget
+/budgets/getBudget -> Documents/projects/budgetMornitoringSystem/budgetMonitoring/a:handleGetBudgets
+/metrics/getQuarterMetrics -> Documents/projects/budgetMornitoringSystem/budgetMonitoring/a:handleQuarterMetrics
+/metrics/getSingleQuarterMetrics -> Documents/projects/budgetMornitoringSystem/budgetMonitoring/a:handleSingleQuarterMetrics
+/quarters/addQuarter -> Documents/projects/budgetMornitoringSystem/budgetMonitoring/a:handleAddQuarter
+/sendMail -> flask:sendMail

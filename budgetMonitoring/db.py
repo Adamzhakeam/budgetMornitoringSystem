@@ -490,6 +490,7 @@ def insertDataIntoBudgetQuaters(budgetQuaterDetails: dict) -> dict:
     checkResponse = getAnyTableData({'tableName':'budgetQuaters','columns':['*'],'condition':'budgetId = ?',
                                      'conditionalData':[budgetQuaterDetails['budgetId']]
                                      ,'limit':4,'returnDicts': True,'returnNamespaces':False,'parseJson': True,'returnGenerator':False})
+    # print('>>>>>>>>>>>',checkResponse)
     if checkResponse['status'] and len(checkResponse['data']) == 4:
         return {'status':False,'log':'you can`t add more than 4 quarters to a budget'}
     # print('>>>>>>>>>>>',checkResponse)
@@ -695,6 +696,42 @@ def insertDataIntoPerformance(performanceDetails: dict) -> dict:
             ]
         )
         return insertionResponse
+    
+def insertDataIntoAnytable(tableName:str, data:list)->dict:
+    '''
+        this function is responsible for inserting data into any table in the database 
+        
+         keys :
+            table(str): database table name
+            data(list): a list of values to insert into the table. the order of values must match the table schema
+            
+    '''
+    dbPath = kutils.config.getValue('bbmsDb/dbPath')
+    tables = kutils.config.getValue('bbmsDb/tables')
+    with kutils.db.Api(dbPath,tables, readonly=False) as db:
+        
+        insertionResponse = db.insert(tableName,data)
+        return insertionResponse
+    return {'status':False,'log':insertionResponse}
+    
+def deleteAnyDatabaseData(dataDetails:dict)->dict:
+    '''
+        this function is responsible for deleting any data from any table in the database 
+        
+         keys :
+            table(str): database table name
+            condition(str): a string indicating the SQL condition for the fetch eg `userId=? and dateCreated<?`. all values a represented with the `?` placeholder
+            conditionData(list): a list containing the values for each `?` placeholder in the condition
+            
+    '''
+    dbPath = kutils.config.getValue('bbmsDb/dbPath')
+    tables = kutils.config.getValue('bbmsDb/tables')
+    with kutils.db.Api(dbPath,tables, readonly=False) as db:
+        
+        deletionResponse = db.delete(dataDetails['tableName'],dataDetails['condition'],dataDetails['conditionalData'])
+        return deletionResponse
+    return {'status':False,'log':deletionResponse}
+    
 def init():
     defaults = {
         'rootPath':'~/Documents/projects/budgetMornitoringSystem/budgetMonitoring',

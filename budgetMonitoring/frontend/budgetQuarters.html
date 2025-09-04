@@ -222,12 +222,12 @@
                         </div>
                         
                         <!-- Quarter ID -->
-                        <div class="mb-4">
+                        <!-- <div class="mb-4">
                             <label for="quaterId" class="form-label fw-bold">Quarter ID</label>
                             <input type="text" class="form-control" id="quaterId" placeholder="e.g., Q1-2023" required>
                             <div class="form-text">Format: Q[quarter number]-[year] (e.g., Q1-2023)</div>
                         </div>
-                        
+                         -->
                         <!-- Date Range -->
                         <div class="row mb-4">
                             <div class="col-md-6">
@@ -283,7 +283,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // DOM Elements
             const budgetSelect = document.getElementById('budgetId');
-            const quaterIdInput = document.getElementById('quaterId');
+            //const quaterIdInput = document.getElementById('quaterId');
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
             const keyValuePairsContainer = document.getElementById('keyValuePairs');
@@ -308,8 +308,8 @@
             endDateInput.value = formatDate(endDate);
             
             // Set default quarter ID based on current quarter
-            const quarterNumber = Math.floor(currentMonth / 3) + 1;
-            quaterIdInput.value = `Q${quarterNumber}-${currentYear}`;
+            //const quarterNumber = Math.floor(currentMonth / 3) + 1;
+           // quaterIdInput.value = `Q${quarterNumber}-${currentYear}`;
             
             // Fetch budgets from API
             fetchBudgets();
@@ -390,10 +390,10 @@
                     return;
                 }
                 
-                if (!quaterIdInput.value) {
-                    showNotification('Please enter a quarter ID', 'error');
-                    return;
-                }
+                //if (!quaterIdInput.value) {
+                //    showNotification('Please enter a quarter ID', 'error');
+                //    return;
+               // }
                 
                 if (!startDateInput.value || !endDateInput.value) {
                     showNotification('Please select both start and end dates', 'error');
@@ -416,7 +416,7 @@
                 // Prepare payload
                 const payload = {
                     budgetId: budgetSelect.value,
-                    quaterId: quaterIdInput.value,
+                   // quaterId: quaterIdInput.value,
                     startDate: startDateInput.value,
                     endDate: endDateInput.value,
                     others: Object.keys(others).length > 0 ? others : undefined
@@ -442,7 +442,7 @@
                         keyValuePairsContainer.innerHTML = '';
                         const quarterNumber = Math.floor(new Date().getMonth() / 3) + 1;
                         const currentYear = new Date().getFullYear();
-                        quaterIdInput.value = `Q${quarterNumber}-${currentYear}`;
+                       // quaterIdInput.value = `Q${quarterNumber}-${currentYear}`;
                     }, 2000);
                 } catch (error) {
                     showNotification('Error: ' + error.message, 'error');

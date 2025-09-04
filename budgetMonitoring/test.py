@@ -12,6 +12,7 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 import os
 from Levenshtein import distance as levenshtein_distance
+import kisa_utils as kutils
 
    
 
@@ -97,6 +98,77 @@ budgets = [
 
 
 
+import threading
+import time
+
+# In-memory undo tracker
+undo_tracker = {}
+
+def insertDataIntoAnytable(tableName: str, data: list, id_index: int = 0) -> dict:
+    """
+    Inserts data into any table and registers undo option for 30 seconds.
+    
+    Args:
+        tableName (str): database table name
+        data (list): ordered values for insertion
+        id_index (int): index of primary key/id in `data`
+    """
+    dbPath = kutils.config.getValue('bbmsDb/dbPath')
+    tables = kutils.config.getValue('bbmsDb/tables')
+
+    with kutils.db.Api(dbPath, tables, readonly=False) as db:
+        insertionResponse = db.insert(tableName, data)
+
+    if not insertionResponse['status']:
+        return insertionResponse
+
+    record_id = data[id_index]
+
+    # Register undo option
+    expiry = time.time() + 30  # 30 seconds window
+    undo_tracker[record_id] = {
+        "table": tableName,
+        "id": record_id,
+        "expiry": expiry
+    }
+
+    # Schedule automatic expiry cleanup
+    threading.Timer(30, lambda: undo_tracker.pop(record_id, None)).start()
+
+    return {
+        "status": True,
+        "log": "Inserted successfully. Undo available for 30s.",
+        "id": record_id
+    }
+
+
+def undoInsertion(record_id: str) -> dict:
+    """
+    Undo insertion if within allowed timeframe.
+    """
+    undo_entry = undo_tracker.get(record_id)
+
+    if not undo_entry:
+        return {"status": False, "log": "Undo not available or expired."}
+
+    if time.time() > undo_entry["expiry"]:
+        undo_tracker.pop(record_id, None)
+        return {"status": False, "log": "Undo window expired."}
+
+    # Perform deletion
+    delete_response = db.deleteAnyDatabaseData({
+        "tableName": undo_entry["table"],
+        "condition": "pID=?",   # assumes your ID column is named `pID`
+        "conditionalData": [undo_entry["id"]]
+    })
+
+    # Remove from tracker
+    undo_tracker.pop(record_id, None)
+
+    return {
+        "status": delete_response,
+        "log": "Insertion undone."
+    }
 
 
 
