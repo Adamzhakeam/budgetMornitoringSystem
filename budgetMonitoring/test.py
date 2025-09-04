@@ -20,7 +20,8 @@ quarters = [
     {
         "name": "Q1 2023 - National Infrastructure",
         "startDate": "2023-01-01",
-        "endDate": "2023-03-31"
+        "endDate": "2023-03-31",
+        "budgetId": "bIDEyNOJYTT",
     },
     
 ]
@@ -106,25 +107,25 @@ budgets = [
 if __name__ == "__main__":
     
     # pprint.pprint(budgetQuaterPerformance("bIDziMnNLhw"))
-    # for quater in education_expenditures:
-    #     print(db.insertDataIntoExpenditure(quater))
+    for quater in quarters:
+        print(db.insertDataIntoBudgetQuaters(quater))
 
 # my stress test is on these bIDEyNOJYTT,bIDuIC1xEeG,bIDQzxZp04C
     # pprint.pprint(db.getExpendituresByBudgetQuarter("bIDvWU6mkod","qId7MFFvF"))
     # pprint.pprint(db.getQuartersByBudgetId('bIDvWU6mkod'))
     
-    pprint.pprint(db.getAnyTableData({
-        'tableName': 'budgetQuaters',
-        'columns': ['*'],
-        'condition': 'budgetId = ?',
-        'conditionalData': ['bIDRoxBPtN2'],
-        'limit':100,
-        'returnDicts': True,
-        'returnNamespaces': False,
-        'parseJson': True,
-        'returnGenerator': False 
+    # pprint.pprint(db.getAnyTableData({
+    #     'tableName': 'budgetQuaters',
+    #     'columns': ['*'],
+    #     'condition': 'budgetId = ?',
+    #     'conditionalData': ['bIDEyNOJYTT'],
+    #     'limit':100,
+    #     'returnDicts': True,
+    #     'returnNamespaces': False,
+    #     'parseJson': True,
+    #     'returnGenerator': False 
         
-    })    )
+    # })    )
     # metrics = utils.getQuarterlyPerfromanceMetric('bIDc99CtOVM')
     # pprint.pprint(metrics)
     # plot_quarterly_pies_detailed('bIDvWU6mkod','/workspaces/budgetMornitoringSystem/budgetMonitoring/database')

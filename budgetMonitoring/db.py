@@ -485,6 +485,15 @@ def insertDataIntoBudgetQuaters(budgetQuaterDetails: dict) -> dict:
     timestamp = kutils.dates.currentTimestamp()
     quaterId = 'qId' + kutils.codes.new(6)
     
+    # check quarters so that they don`t exceed 4`
+    
+    checkResponse = getAnyTableData({'tableName':'budgetQuaters','columns':['*'],'condition':'budgetId = ?',
+                                     'conditionalData':[budgetQuaterDetails['budgetId']]
+                                     ,'limit':4,'returnDicts': True,'returnNamespaces':False,'parseJson': True,'returnGenerator':False})
+    if checkResponse['status'] and len(checkResponse['data']) == 4:
+        return {'status':False,'log':'you can`t add more than 4 quarters to a budget'}
+    # print('>>>>>>>>>>>',checkResponse)
+    
     with kutils.db.Api(dbPath, tables, readonly=False) as db:
         insertionResponse = db.insert(
             'budgetQuaters',
