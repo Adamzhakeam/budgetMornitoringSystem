@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Your existing CSS remains unchanged */
         :root {
             --primary-color: #3498db;
             --secondary-color: #2c3e50;
@@ -575,7 +576,11 @@
                 
                 resultItem.addEventListener('click', function() {
                     inputElement.value = `${item.name} ^ ${item.table}`;
-                    inputElement.nextElementSibling.nextElementSibling.value = item.Id;
+                    
+                    // Find the hidden input for category ID
+                    const categoryIdInput = inputElement.closest('.mb-3').querySelector('.category-id');
+                    categoryIdInput.value = item.Id;
+                    
                     resultsContainer.style.display = 'none';
                     
                     // Hide validation error
@@ -586,7 +591,7 @@
             });
         }
         
-        // Display other search results
+        // Display other search results - FIXED: Correct DOM traversal for other items
         function displayOtherResults(results, resultsContainer, inputElement) {
             resultsContainer.innerHTML = '';
             
@@ -605,16 +610,17 @@
                 resultItem.addEventListener('click', function() {
                     inputElement.value = `${item.name} ^ ${item.table}`;
                     
-                    // Set the hidden ID field
-                    const hiddenId = inputElement.nextElementSibling;
+                    // FIXED: Correct DOM traversal to find the hidden input
+                    const parentContainer = inputElement.closest('.mb-2');
+                    const hiddenId = parentContainer.querySelector('.other-id');
                     hiddenId.value = item.Id;
                     
                     // Update key display
-                    const keyDisplay = inputElement.parentElement.querySelector('.key-text');
+                    const keyDisplay = parentContainer.querySelector('.key-text');
                     keyDisplay.textContent = item.Id;
                     
                     // Clear the manual input field if it's visible
-                    const manualInput = inputElement.parentElement.querySelector('.other-key');
+                    const manualInput = parentContainer.querySelector('.other-key');
                     if (manualInput) {
                         manualInput.value = '';
                     }
@@ -622,8 +628,8 @@
                     resultsContainer.style.display = 'none';
                     
                     // Hide validation errors
-                    inputElement.closest('.row').querySelector('.other-key-error').style.display = 'none';
-                    inputElement.closest('.row').querySelector('.other-value-error').style.display = 'none';
+                    parentContainer.querySelector('.other-key-error').style.display = 'none';
+                    parentContainer.closest('.row').querySelector('.other-value-error').style.display = 'none';
                 });
                 
                 resultsContainer.appendChild(resultItem);
@@ -837,19 +843,22 @@
                 const manualKey = row.querySelector('.other-key').value;
                 const value = row.querySelector('.other-value').value;
                 
-                if ((!otherId && !manualKey) && value) {
-                    row.querySelector('.other-key-error').style.display = 'block';
-                    isValid = false;
-                }
-                
-                if (value && (!otherId && !manualKey)) {
-                    row.querySelector('.other-key-error').style.display = 'block';
-                    isValid = false;
-                }
-                
-                if ((otherId || manualKey) && !value) {
-                    row.querySelector('.other-value-error').style.display = 'block';
-                    isValid = false;
+                // Only validate if at least one field has content
+                if (otherId || manualKey || value) {
+                    if ((!otherId && !manualKey) && value) {
+                        row.querySelector('.other-key-error').style.display = 'block';
+                        isValid = false;
+                    }
+                    
+                    if (value && (!otherId && !manualKey)) {
+                        row.querySelector('.other-key-error').style.display = 'block';
+                        isValid = false;
+                    }
+                    
+                    if ((otherId || manualKey) && !value) {
+                        row.querySelector('.other-value-error').style.display = 'block';
+                        isValid = false;
+                    }
                 }
             });
             
@@ -882,7 +891,11 @@
                 budgetDetails.items.push(row.querySelector('.item-name').value);
                 budgetDetails.quantity.push(parseInt(row.querySelector('.quantity').value) || 0);
                 budgetDetails.amount.push(parseInt(row.querySelector('.amount').value) || 0);
-                budgetDetails.categories.push(row.querySelector('.category-search').value);
+                
+                // Get category name and ID
+                const categoryName = row.querySelector('.category-search').value;
+                const categoryId = row.querySelector('.category-id').value;
+                budgetDetails.categories.push({name: categoryName, id: categoryId});
             });
             
             // Prepare other items - FIXED: Handle both dropdown selection and manual input

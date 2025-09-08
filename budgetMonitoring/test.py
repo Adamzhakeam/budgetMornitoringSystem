@@ -179,8 +179,8 @@ def undoInsertion(record_id: str) -> dict:
 if __name__ == "__main__":
     
     # pprint.pprint(budgetQuaterPerformance("bIDziMnNLhw"))
-    for quater in quarters:
-        print(db.insertDataIntoBudgetQuaters(quater))
+    # for quater in quarters:
+        # print(db.insertDataIntoBudgetQuaters(quater))
 
 # my stress test is on these bIDEyNOJYTT,bIDuIC1xEeG,bIDQzxZp04C
     # pprint.pprint(db.getExpendituresByBudgetQuarter("bIDvWU6mkod","qId7MFFvF"))
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     # print(plot_quarterly_activities(metrics,save_path='quarterly_performance.png'))
     # pprint.pprint(utils.getQuarterlyPerfromanceMetric('bIDziMnNLhw'))
     # pprint.pprint(utils.getExpendituresByBudgetQuarterDate('bIDvWU6mkod','qId7MFFvF','2023-12'))
-    # pprint.pprint(db.getAnyChartAccount('israel'))
+    pprint.pprint(db.getAnyChartAccount('sor'))
         # pass
         
         

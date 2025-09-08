@@ -767,10 +767,16 @@
             budgetLoading.style.display = 'inline-block';
             
             try {
+                //Const username = 'admin';
+                //const password = 'password123';
+                //const authHeader = 'Basic ' + btoa(username + ':' + password);
+
+
                 const response = await fetch('http://127.0.0.1:5000/getBudget', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        //"Authorization": authHeader
                     }
                 });
                 
@@ -860,10 +866,14 @@
             dashboard.innerHTML = '<div class="loading">Loading data...</div>';
 
             try {
-                const response = await fetch("http://127.0.0.1:5000/getSingleQuarterMetrics", {
+                    //const username = 'admin';
+                   // const password = 'password123';
+                    //const authHeader = 'Basic ' + btoa(username + ':' + password);
+                    const response = await fetch("http://127.0.0.1:5000/getSingleQuarterMetrics", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        //"Authorization": authHeader
                     },
                     body: JSON.stringify({ 
                         budgetId: budgetId,
