@@ -892,7 +892,7 @@
             budgetLoading.style.display = 'inline-block';
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/getBudget', {
+                const response = await fetch('http://192.168.73.170:5000/getBudget', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -983,7 +983,7 @@
             metricsGrid.innerHTML = '<div class="loading">Loading data...</div>';
 
             try {
-                const response = await fetch("http://127.0.0.1:5000/getQuarterMetrics", {
+                const response = await fetch("http://192.168.73.170:5000/getQuarterMetrics", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

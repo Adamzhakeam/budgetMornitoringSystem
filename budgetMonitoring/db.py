@@ -1,8 +1,8 @@
 '''
-    the modules are resposible for handling database logic insert,
+    the modules are responsible for handling database logic insert,
     read,delete,select and update  data into the database 
     
-    the modules below will consiste of functions and classes 
+    the modules below will consist of functions and classes 
 '''
 
 import kisa_utils as kutils

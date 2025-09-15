@@ -618,6 +618,41 @@ def handleAddQuarter():
     
     return jsonify(validationResponse)
 
+@app.route('/addexpense',methods=['POST'])
+# @role_required(['MANAGER'])
+def handleAddExpenses():
+    '''
+    this function is responsible for handling 
+    the addexpense endpoint 
+    '''
+    from db import insertDataIntoExpenditure
+    payload = request.get_json()
+    payloadStructure = {
+        'budgetId':kutils.config.getValue('bbmsDb/budgetId'),
+        'dateOfExpense':kutils.config.getValue('bbmsDb/dateOfExpense'),
+        'detailsOfExpense':kutils.config.getValue('bbmsDb/detailsOfExpense'),
+        'amountSpent':kutils.config.getValue('bbmsDb/amountSpent'),
+        'beneficially':kutils.config.getValue('bbmsDb/beneficially'),
+        'evidence':kutils.config.getValue('bbmsDb/evidence'),
+        'others':kutils.config.getValue('bbmsDb/others')
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    print('>>',validationResponse)
+    print('>>>>',payload)
+    if validationResponse['status']:
+        for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+        
+        expenseInsertionResponse  = insertDataIntoExpenditure(payload)
+            
+            
+        return jsonify(expenseInsertionResponse)
+    
+    return jsonify(validationResponse)
 
 @app.route('/getBudget',methods=['POST'])
 def handleGetBudgets():
@@ -644,6 +679,11 @@ def handleGetBudgets():
 def init():
     
         defaults = {
+            'dateOfExpensse':str,
+            'detailsOfExpense':str,
+            'amountSpent':int,
+            'beneficially':str,
+            'evidence':str,
             'recipients':list,
             'message':str,
             'subject':str,
