@@ -326,7 +326,7 @@
 
 from flask import Flask,request,jsonify,session, redirect, url_for,render_template,make_response,send_file
 # from flask_sqlalchemy import SQL
-from functools import wraps
+import functools
 from flask_cors import CORS
 import kisa_utils as kutils
 # kutils.servers.flask
@@ -349,6 +349,113 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False 
 
 mail = Mail(app)
+
+def role_required(allowed_roles):
+    from db import fetchRole
+    """
+    Decorator to restrict access based on user roles.
+    """
+    def decorator(f):
+        @functools.wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Get token from Authorization header
+            auth_header = request.headers.get('Authorization')
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return jsonify({'status': False, 'log': 'Missing or invalid token'}), 401
+            
+            token = auth_header[7:]  # Remove 'Bearer ' prefix
+            
+            # Verify token
+            token_data = kutils.token.read(token, 'v1')
+            if not token_data['status']:
+                return jsonify({'status': False, 'log': 'Invalid token'}), 401
+            
+            # Check role permissions
+            roleId= token_data['data'].get('roleId')
+            roleFecthResponse = fetchRole({'roleId':roleId})
+            if not roleFecthResponse['status']:
+                return jsonify({'status':False,'log':'Insufficinet permissions to perform task'})
+            if roleFecthResponse['data'][0]['role'] not in allowed_roles:
+                return jsonify({'status': False, 'log': 'Insufficient permissions'}), 403
+            
+            # Add user info to request context if needed
+            request.user = token_data['data']
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+@app.route("/login",methods=['POST'])
+def login():
+    from db import login
+    data = request.get_json()
+    phoneNumber = data.get('phoneNumber')
+    email = data.get('email')
+    password = data.get('password')
+    user = login({'phoneNumber': phoneNumber,'email':email, 'password': password})
+    if user['status']:
+
+            return jsonify(user)
+    
+    return jsonify(user)
+
+@app.route('/createRole',methods=['POST'])
+# @role_required(['ADMIN'])
+def handleCreateRole():
+    
+    '''
+        this endpoint is responsible for creating a a role
+    '''
+    from db import createRoles
+    payload = request.get_json()
+    payloadStructure = {
+        'role':kutils.config.getValue('bbmsDb/role'),
+        'others':kutils.config.getValue('bbmsDb/others')
+       
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    
+    if validationResponse['status']:
+        for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+        
+        createRoleResponse  = createRoles(payload)
+        
+        if not createRoleResponse['status']:
+            return jsonify(createRoleResponse)
+    
+    return jsonify(validationResponse)
+
+@app.route('/profile', methods=['POST'])
+# @token_required(['user', 'MANAGER', 'ADMIN'])
+def dashboard():
+     from db import fetchRole    
+     auth_header = request.headers.get('Authorization')
+     if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'status': False, 'log': 'Missing or invalid token'}), 401
+            
+     token = auth_header[7:]  # Remove 'Bearer ' prefix
+            
+            # Verify token
+     token_data = kutils.token.read(token, 'v1')
+     print('>>>>>',token_data)
+     if not token_data['status']:
+        return jsonify({'status': False, 'log': 'Invalid token'}), 401
+            
+            # Check role permissions
+     roleID= token_data['data'].get('roleId')
+     roleFecthResponse = fetchRole({'roleId':roleID})
+     userName = token_data['data'].get('userName')
+     role = roleFecthResponse['data'][0]['role']
+    
+    
+     return jsonify({'status': True, 'userName': userName, 'role': role})
+
+
 
 @app.route("/sendMail", methods=['POST'])
 def sendMail():
@@ -420,6 +527,8 @@ def sendDynamicMail(mailDetails: dict) -> dict:
         
     except Exception as e:
         return {'status': False, 'log': f'Failed to send email: {str(e)}'}
+    
+    
 @app.route('/')
 def home():
     # create the database tables if they don't exist 
@@ -505,15 +614,15 @@ def handleAdduser():
     this function is responsible for handling 
     the adduser endpoint 
     '''
-    from db import createUser
+    from db import createuser
     payload = request.get_json()
     payload['entryId'] = kutils.codes.new()
     payload['userId'] = kutils.codes.new()
     payload['timestamp'] = kutils.dates.currentTimestamp()
     payloadStructure = {
-        'entryId':kutils.config.getValue('bbmsDb/entryId'),
+        
         'timestamp':kutils.config.getValue('bbmsDb/timestamp'),
-        'userId':kutils.config.getValue('bbmsDb/userId'),
+        
         'userName':kutils.config.getValue('bbmsDb/userName'),
         'password':kutils.config.getValue('bbmsDb/password'),
         'email':kutils.config.getValue('bbmsDb/email'),
@@ -532,14 +641,14 @@ def handleAdduser():
                     'log': f'The value for {key} is missing. Please provide it.'
                 })
         
-        createUserResponse  = createUser(payload)
+        createUserResponse  = createuser(payload)
         
-        if createUserResponse['status']:
-            mailResponse = sendDynamicMail({'recipients':[payload['email']],
-                                            'message':f'Your account hasbeen created in the bbms and your password is 1234 and username is {payload["userName"]}',
-                                            'subject':"account creation in the BBMS "})
-            if mailResponse['status']:
-                return createUserResponse
+        # if createUserResponse['status']:
+        #     mailResponse = sendDynamicMail({'recipients':[payload['email']],
+        #                                     'message':f'Your account hasbeen created in the bbms and your password is 1234 and username is {payload["userName"]}',
+        #                                     'subject':"account creation in the BBMS "})
+        #     if mailResponse['status']:
+        #         return createUserResponse
             
             
         return jsonify(createUserResponse)
@@ -654,6 +763,62 @@ def handleAddExpenses():
     
     return jsonify(validationResponse)
 
+@app.route('/getExpense',methods=['POST'])
+def handleGetExpenses():
+    from db import getAnyTableData
+    payload = request.get_json()
+    payloadStructure = {
+        'budgetId':kutils.config.getValue('bbmsDb/budgetId')
+    }
+    validationResponse = kutils.structures.validator.validate(payload,payloadStructure)
+    if validationResponse['status']:
+         for key in payload:
+            if not payload[key]:
+                return jsonify({
+                    'status': False,
+                    'log': f'The value for {key} is missing. Please provide it.'
+                })
+                
+         fetchResponse = getAnyTableData(
+        {
+        'tableName': 'expenditure',
+        'columns': ['*'],
+        'condition': 'budgetId = ?',
+        'conditionalData': [payload['budgetId']],
+        'limit':100,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False 
+        
+    }
+    )
+         return jsonify(fetchResponse)
+    return jsonify(validationResponse)
+
+@app.route('/getAllExpenses',methods=['POST'])
+def handleGetAallEXpenses():
+    '''
+        this endpoint is responsible for getting all the expenses 
+    '''
+    from db import getAnyTableData
+    
+    expenses = getAnyTableData(
+        {
+        'tableName': 'expenditure',
+        'columns': ['*'],
+        'condition': '',
+        'conditionalData': [],
+        'limit':100,
+        'returnDicts': True,
+        'returnNamespaces': False,
+        'parseJson': True,
+        'returnGenerator': False
+        }
+        
+    )
+    return jsonify(expenses)
+
 @app.route('/getBudget',methods=['POST'])
 def handleGetBudgets():
     from db import getAnyTableData
@@ -679,7 +844,8 @@ def handleGetBudgets():
 def init():
     
         defaults = {
-            'dateOfExpensse':str,
+            'role':str,
+            'dateOfExpense':str,
             'detailsOfExpense':str,
             'amountSpent':int,
             'beneficially':str,

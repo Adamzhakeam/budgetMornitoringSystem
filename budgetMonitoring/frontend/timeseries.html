@@ -104,6 +104,14 @@
             border-radius: 8px;
             margin-bottom: 8px;
             cursor: pointer;
+            color: inherit;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .nav-item a{
+            color: inherit;
+            text-decoration: none;
             transition: var(--transition);
         }
 
@@ -588,6 +596,106 @@
             border-top: 2px solid var(--primary);
             z-index: -1;
         }
+        /* User profile dropdown styles */
+        .user-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: blueviolet;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: var(--dark);
+        }
+        
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 10px 0;
+            width: 200px;
+            box-shadow: var(--box-shadow);
+            z-index: 100;
+            display: none;
+        }
+        
+        .profile-dropdown.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .dropdown-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--dark);
+        }
+        
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: var(--gray-700);
+            margin: 5px 0;
+        }
+        .dropdown-text {
+            color: var(--dark)
+
+        }
+        /* Logout button specific style */
+        .logout-btn {
+            color: #e74c3c !important;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.1) !important;
+        }
     </style>
 </head>
 <body>
@@ -599,13 +707,23 @@
                 <h1>BudgetVision</h1>
             </div>
             <div class="nav-menu">
-                <div class="nav-item active">
+                <div class="nav-item ">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </div>
-                <div class="nav-item">
+                 <div class="nav-item ">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Quarter Metrics</span>
+                </div>
+                <div class="nav-item ">
+                    <a href="siglemetrics.html" aria-label="Monthly Metrics">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Monthly Metrics</span>
+                    </a>
+                </div>
+                <div class="nav-item active">
                     <i class="fas fa-chart-line"></i>
-                    <span>Analytics</span>
+                    <span>Timeseries</span>
                 </div>
                 <div class="nav-item">
                     <i class="fas fa-wallet"></i>
@@ -637,8 +755,31 @@
                     <div class="header-action-btn">
                         <i class="fas fa-question-circle"></i>
                     </div>
-                    <div class="header-action-btn">
-                        <i class="fas fa-user"></i>
+                    <!-- User Profile Section -->
+                    <div class="user-profile" id="userProfile">
+                        <div class="user-avatar" id="userAvatar">JD</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">John Doe</div>
+                            <div class="user-role" id="userRole">Administrator</div>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                        
+                        <!-- Profile Dropdown -->
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item logout-btn" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -733,6 +874,64 @@
             metricsGrid.innerHTML = `<div class="error-message">${message}</div>`;
         }
         
+         // Fetch user profile from token
+        async function fetchUserProfile() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                // Redirect to login if no token found
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://192.168.73.170:5000/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const responseData = await response.json();
+                
+                // Check if the API returned an error
+                if (responseData.status === false) {
+                    throw new Error(responseData.log || 'API returned an error');
+                }
+                
+                // Update UI with user data
+                document.getElementById('userName').textContent = responseData.userName;
+                document.getElementById('userRole').textContent = responseData.role;
+                
+                // Set avatar initials
+                const nameParts = responseData.userName.split(' ');
+                let initials = '';
+                if (nameParts.length === 1) {
+                    initials = nameParts[0].charAt(0);
+                } else {
+                    initials = nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0);
+                }
+                document.getElementById('userAvatar').textContent = initials.toUpperCase();
+                
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+                // If token is invalid, redirect to login
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+        }
+        
+       
+
         // Fetch all budgets from the server
         async function fetchBudgets() {
             const budgetSelect = document.getElementById('budgetId');
@@ -1339,9 +1538,32 @@
             chartTypeToggle.addEventListener('change', function() {
                 setChartType(this.checked ? 'curve' : 'line');
             });
+
+             // Fetch user profile
+            fetchUserProfile();
             
             // Fetch budgets for the dropdown
             fetchBudgets();
+
+            // Set up user profile dropdown toggle
+            const userProfile = document.getElementById('userProfile');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            userProfile.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', function() {
+                profileDropdown.classList.remove('show');
+            });
+            
+            // Set up logout button
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                logout();
+            });
         }
     </script>
 </body>

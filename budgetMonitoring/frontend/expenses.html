@@ -397,29 +397,7 @@
     <!-- Main Content -->
     <div class="container py-5">
         <!-- Dashboard Stats -->
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <i class="fas fa-wallet"></i>
-                <h3 id="totalBudget">$0</h3>
-                <p>Total Budget</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-money-bill-wave"></i>
-                <h3 id="totalExpenses">$0</h3>
-                <p>Total Expenses</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-piggy-bank"></i>
-                <h3 id="remainingBudget">$0</h3>
-                <p>Remaining Budget</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-receipt"></i>
-                <h3 id="expenseCount">0</h3>
-                <p>Expense Records</p>
-            </div>
-        </div>
-
+        
         <div class="toggle-container">
             <span class="toggle-text">Dark Mode</span>
             <label class="toggle-switch">
@@ -559,7 +537,7 @@
             GET_BUDGETS: 'http://192.168.73.170:5000/getBudget',
             GET_BUDGET_DETAILS: 'http://192.168.73.170:5000/getBudget',
             ADD_EXPENSE: 'http://192.168.73.170:5000/addExpense',
-            GET_RECENT_EXPENSES: '/getRecentExpenses',
+            GET_RECENT_EXPENSES: 'http://192.168.73.170:5000/getAllExpenses',
             GET_DASHBOARD_STATS: 'http://192.168.73.170:5000/getBudget',
             SEARCH_CHART_ACCOUNTS: 'http://192.168.73.170:5000/getAnyChartAccount'
         };

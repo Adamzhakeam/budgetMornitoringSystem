@@ -14,7 +14,20 @@ import os
 from Levenshtein import distance as levenshtein_distance
 import kisa_utils as kutils
 
-   
+user ={
+    
+    'userName':'Jane Doe',
+    'phoneNumber':772442222,
+    'password':'alqaeda',
+    'email':'janedoe@gmail.com',
+    'roleId':'RIDZz4A4G'
+}
+
+role = {
+    'role':'Admin',
+    'others':{
+        'permissions':['create_user','delete_user','update_user','view_user']}
+}
 
 quarters = [
     # Budget 1: bIDEyNOJYTT (Infrastructure)
@@ -187,11 +200,11 @@ if __name__ == "__main__":
     # pprint.pprint(db.getQuartersByBudgetId('bIDvWU6mkod'))
     
     pprint.pprint(db.getAnyTableData({
-        'tableName': 'budget',
+        'tableName': 'expenditure',
         'columns': ['*'],
         'condition': '',
         'conditionalData': [],
-        'limit':100,
+        'limit':2,
         'returnDicts': True,
         'returnNamespaces': False,
         'parseJson': True,
@@ -205,8 +218,10 @@ if __name__ == "__main__":
     # print(plot_quarterly_activities(metrics,save_path='quarterly_performance.png'))
     # pprint.pprint(utils.getQuarterlyPerfromanceMetric('bIDziMnNLhw'))
     # pprint.pprint(utils.getExpendituresByBudgetQuarterDate('bIDvWU6mkod','qId7MFFvF','2023-12'))
-    # pprint.pprint(db.getAnyChartAccount('sor'))
-        # pass
+    pprint.pprint(db.getAnyChartAccount('sor'))
+    # pprint.pprint(db.createuser(user))
+    # pprint.pprint(db.fetchAllRoles())
+    pass
         
         
       

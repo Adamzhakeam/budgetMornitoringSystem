@@ -118,6 +118,7 @@ def createuser(userDetails:dict)->dict:
     entryId = kutils.codes.new()
     timestamp = kutils.dates.currentTimestamp()
     userId = kutils.codes.new()
+    others = {}
     with kutils.db.Api(dbPath,dbTable, readonly=False) as db:
         phoneNumberResponse = db.fetch(
             'users',
@@ -135,7 +136,7 @@ def createuser(userDetails:dict)->dict:
         userCreationResponse = db.insert(
             'users',
             [entryId,timestamp,userId,userDetails['userName'],
-             passwordHash,userDetails['phoneNumber'],userDetails['email'],userDetails['roleId']]
+             passwordHash,userDetails['phoneNumber'],userDetails['email'],userDetails['roleId'],others]
         )
     return(userCreationResponse)
 
@@ -238,7 +239,7 @@ def createRoles(roleDetails:dict)->dict:
     dbPath = kutils.config.getValue('bbmsDb/dbPath')
     dbTable = kutils.config.getValue('bbmsDb/tables')
     entryId = kutils.codes.new()
-    roleId = kutils.codes.new()
+    roleId = 'RID'+kutils.codes.new(6)
     timestamp = kutils.dates.currentTimestamp()
     role = roleDetails['role'].upper()
     with kutils.db.Api(dbPath,dbTable, readonly=False) as db:
@@ -276,7 +277,8 @@ def fetchRole(roleDetails:dict)->list:
         
         return {
             'status':True,
-            'log':roleFetchResults
+            'log':'',
+            'data':roleFetchResults
         }
     
     
@@ -310,6 +312,36 @@ def fetchAllRoles()->list:
             'log':roleFetchResults
         }
         
+def login(userDetails:dict)->dict:
+    '''
+        this function is responsible for verifying credentials from the front end 
+        @param userDetails:'phoneNumber','password' are the expected keys  
+    '''
+    dbPath = kutils.config.getValue('bbmsDb/dbPath')
+    dbTable = kutils.config.getValue('bbmsDb/tables')
+    passwordHash = kutils.encryption.hash(userDetails['password'])
+    with kutils.db.Api(dbPath,dbTable, readonly=True) as db:
+        userFetchResponse = db.fetch(
+            'users',
+            ['userId','userName','phoneNumber','roleId'],'phoneNumber=? and password=? ',
+            [userDetails['phoneNumber'],passwordHash],
+            limit = 1,
+            returnDicts=True,
+            returnNamespaces=False,
+            parseJson=False,
+            returnGenerator=False
+        )
+        if len(userFetchResponse) > 0:
+            tokenData = {
+                "userName":userFetchResponse[0]['userName'],
+                "phoneNumber":userFetchResponse[0]['phoneNumber'],
+                "roleId":userFetchResponse[0]['roleId'],
+            }
+            token = kutils.token.new(tokenData,86400,'v1')
+            return {'status':True, 'token':token['token']}
+        return{'status':False, 'log':'You have input a wrong password or phoneNumber'}
+        
+
 # --the modules below are responsible for adding data into budget table 
 
 def insertDataIntoBudget(budgetDetails:dict)->dict:
@@ -731,6 +763,24 @@ def deleteAnyDatabaseData(dataDetails:dict)->dict:
         deletionResponse = db.delete(dataDetails['tableName'],dataDetails['condition'],dataDetails['conditionalData'])
         return deletionResponse
     return {'status':False,'log':deletionResponse}
+
+def getExpenditureById(budgetId:str)->dict:
+    '''
+        this function is responsible for retreaving expenditure by the budget id 
+        
+        @ param  : `str `: `budget id`
+    '''
+    return getAnyTableData({
+        'tableName':'expenditure',
+        'columns':['*'],
+        'condition':'budgetId = ?',
+        'conditionalData':[budgetId],
+        'limit':100,
+        'returnDicts':True,
+        'returnNamespaces':False,
+        'parseJson':True,
+        'returnGenerator':False
+    })
     
 def init():
     defaults = {

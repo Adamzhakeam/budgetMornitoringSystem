@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Budget Dashboard</title>
+    <title>BudgetVision - Comprehensive Financial Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Your existing CSS remains the same */
         :root {
             --primary: #4361ee;
             --primary-light: #4895ef;
@@ -31,6 +32,14 @@
             --border-radius: 12px;
             --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
+            
+            /* New futuristic color variables */
+            --neon-blue: #00f3ff;
+            --neon-purple: #bd00ff;
+            --neon-pink: #ff00c8;
+            --dark-bg: #0a0e17;
+            --card-bg: #131a29;
+            --card-border: rgba(67, 97, 238, 0.2);
         }
 
         * {
@@ -41,8 +50,8 @@
 
         body {
             font-family: 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edfb 100%);
-            color: var(--gray-800);
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0d1324 100%);
+            color: var(--gray-200);
             line-height: 1.6;
             min-height: 100vh;
             padding: 0;
@@ -50,7 +59,7 @@
         }
 
         .app-container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
             padding: 20px;
             display: grid;
@@ -58,7 +67,7 @@
             gap: 20px;
         }
 
-        /* Sidebar Styles */
+          /* Sidebar Styles */
         .sidebar {
             background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
             border-radius: var(--border-radius);
@@ -128,7 +137,8 @@
         }
 
         .header {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: var(--border-radius);
             padding: 20px 25px;
             box-shadow: var(--box-shadow);
@@ -140,12 +150,12 @@
         .header-title h2 {
             font-size: 24px;
             font-weight: 700;
-            color: var(--dark);
+            color: white;
             margin-bottom: 5px;
         }
 
         .header-title p {
-            color: var(--gray-600);
+            color: var(--gray-400);
             font-size: 15px;
         }
 
@@ -161,8 +171,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--gray-100);
-            color: var(--gray-700);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--gray-400);
             cursor: pointer;
             transition: var(--transition);
         }
@@ -170,6 +180,143 @@
         .header-action-btn:hover {
             background: var(--primary);
             color: white;
+        }
+
+        /* User profile dropdown styles */
+        .user-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+        
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 10px 0;
+            width: 200px;
+            box-shadow: var(--box-shadow);
+            z-index: 100;
+            display: none;
+        }
+        
+        .profile-dropdown.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .dropdown-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gray-400);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background: var(--gray-700);
+            margin: 5px 0;
+        }
+        
+        /* Logout button specific style */
+        .logout-btn {
+            color: #e74c3c !important;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.1) !important;
+        }
+
+        /* Dashboard Tabs */
+        .dashboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            border: 1px solid var(--card-border);
+        }
+
+        .tab {
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            color: var(--gray-400);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
         }
 
         /* Dashboard Grid */
@@ -180,12 +327,19 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: var(--border-radius);
             padding: 20px;
             box-shadow: var(--box-shadow);
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
 
         .stat-header {
@@ -198,7 +352,7 @@
         .stat-title {
             font-size: 15px;
             font-weight: 600;
-            color: var(--gray-600);
+            color: var(--gray-400);
         }
 
         .stat-icon {
@@ -231,7 +385,7 @@
         .stat-value {
             font-size: 24px;
             font-weight: 700;
-            color: var(--dark);
+            color: white;
             margin-bottom: 5px;
         }
 
@@ -253,7 +407,8 @@
 
         /* Chart Section */
         .chart-section {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: var(--border-radius);
             padding: 25px;
             box-shadow: var(--box-shadow);
@@ -270,7 +425,7 @@
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            color: var(--dark);
+            color: white;
         }
 
         .section-actions {
@@ -281,11 +436,11 @@
 
         .filter-btn {
             padding: 8px 15px;
-            background: var(--gray-100);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
-            color: var(--gray-700);
+            color: var(--gray-400);
             cursor: pointer;
             transition: var(--transition);
             border: none;
@@ -302,9 +457,287 @@
             position: relative;
         }
 
-        /* Input Styles */
+        /* Form Styles */
+        .form-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-400);
+        }
+
+        .form-input {
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            color: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .form-select {
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            color: white;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .form-button {
+            padding: 12px 25px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .form-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.5);
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .data-table th, .data-table td {
+            padding: 14px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-700);
+        }
+
+        .data-table th {
+            background-color: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: var(--gray-400);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Loading and error styles */
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray-600);
+            font-size: 18px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: 500;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .success-message {
+            color: #2ecc71;
+            background-color: rgba(46, 204, 113, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: 500;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .positive {
+            background-color: rgba(46, 125, 50, 0.2);
+            color: #2ecc71;
+        }
+
+        .negative {
+            background-color: rgba(198, 40, 40, 0.2);
+            color: #e74c3c;
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 2px solid rgba(243, 243, 243, 0.2);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Animation for cards */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card, .chart-section, .form-section {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                align-self: stretch;
+                justify-content: space-between;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .section-actions {
+                flex-wrap: wrap;
+            }
+            
+            .dashboard-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+            }
+        }
+
+        /* Login prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--card-border);
+        }
+
+        .login-prompt h3 {
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .login-prompt p {
+            margin-bottom: 20px;
+            color: var(--gray-400);
+        }
+
+        .login-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.5);
+        }
+
+        /* Styles for Monthly Insights and Time Series */
         .input-section {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: var(--border-radius);
             padding: 25px;
             box-shadow: var(--box-shadow);
@@ -327,15 +760,17 @@
         .input-label {
             font-size: 14px;
             font-weight: 600;
-            color: var(--gray-700);
+            color: var(--gray-400);
         }
 
         .input-field {
             padding: 12px 15px;
-            border: 1px solid var(--gray-300);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
             font-size: 15px;
             transition: var(--transition);
+            color: white;
         }
 
         .input-field:focus {
@@ -365,63 +800,6 @@
             transform: translateY(-2px);
         }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .app-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .input-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .header-actions {
-                align-self: stretch;
-                justify-content: space-between;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .section-actions {
-                flex-wrap: wrap;
-            }
-            
-            .charts-container {
-                flex-direction: column;
-            }
-        }
-
-        /* Animation for cards */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .stat-card, .chart-section, .input-section {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* Toggle switch */
         .toggle-container {
             display: flex;
             align-items: center;
@@ -430,7 +808,7 @@
 
         .toggle-text {
             font-size: 14px;
-            color: var(--gray-600);
+            color: var(--gray-400);
         }
 
         .toggle-switch {
@@ -453,7 +831,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--gray-300);
+            background-color: var(--gray-700);
             transition: .4s;
             border-radius: 34px;
         }
@@ -478,91 +856,6 @@
             transform: translateX(26px);
         }
 
-        /* Table Styles */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .data-table th, .data-table td {
-            padding: 14px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .data-table th {
-            background-color: var(--gray-100);
-            font-weight: 600;
-            color: var(--gray-700);
-        }
-
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table tr:hover td {
-            background-color: var(--gray-100);
-        }
-
-        /* Loading and error styles */
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: var(--gray-600);
-            font-size: 18px;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            background-color: #ffebee;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-weight: 500;
-            border-left: 4px solid #e74c3c;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .positive {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .negative {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-
-        /* Spinner */
-        .spinner {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid var(--primary);
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-left: 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Quarter tags */
         .quarter-tags {
             display: flex;
             flex-wrap: wrap;
@@ -572,80 +865,113 @@
         
         .quarter-tag {
             background: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
+            color: var(--primary-light);
             padding: 8px 15px;
             border-radius: 20px;
             font-size: 14px;
             font-weight: 500;
         }
 
-        /* Charts container for pie charts */
         .charts-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
         
         .chart-wrapper {
-            flex: 1;
-            min-width: 300px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
             height: 350px;
-            position: relative;
         }
         
         .chart-wrapper h3 {
             margin-top: 0;
-            font-size: 16px;
-            color: var(--gray-700);
-            text-align: center;
             margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--gray-400);
+            text-align: center;
         }
         
-        .chart-container canvas {
-            width: 100% !important;
-            height: 100% !important;
+        .category-graph-container {
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        .quarter-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 20px;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-top: 2px solid var(--primary);
+            z-index: -1;
+        }
+        /* ... (truncated for brevity) ... */
+
+        /* Budget selector style */
+        .budget-selector {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: white;
+            min-width: 250px;
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
+        <!-- Sidebar (unchanged) -->
+         <div class="sidebar">
             <div class="logo">
                 <i class="fas fa-chart-pie"></i>
                 <h1>BudgetVision</h1>
             </div>
             <div class="nav-menu">
-                <div class="nav-item active">
+                <div class="nav-item active" data-tab="overview">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </div>
-                <div class="nav-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Analytics</span>
-                </div>
-                <div class="nav-item">
+                <div class="nav-item" data-tab="budgets">
                     <i class="fas fa-wallet"></i>
                     <span>Budgets</span>
                 </div>
-                <div class="nav-item">
-                    <i class="fas fa-history"></i>
-                    <span>History</span>
+                <div class="nav-item" data-tab="timeseries">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Time Series</span>
                 </div>
-                <div class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
+                <div class="nav-item" data-tab="quarterly">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Quarterly Insights</span>
+                </div>
+                <div class="nav-item" data-tab="monthly">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Monthly Insights</span>
+                </div>
+                <div class="nav-item" data-tab="expenses">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Register Expense</span>
+                </div>
+                <div class="nav-item" data-tab="disbursements">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>Register Disbursement</span>
                 </div>
             </div>
         </div>
+        
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Header -->
+            <!-- Header (unchanged) -->
             <div class="header">
+                
                 <div class="header-title">
-                    <h2>Budget Analytics Dashboard</h2>
-                    <p>Track expenditure patterns and budget utilization</p>
+                    <h2>Budget Monitoring Dashboard</h2>
+                    <p>Comprehensive financial oversight and management</p>
                 </div>
                 <div class="header-actions">
                     <div class="header-action-btn">
@@ -654,78 +980,616 @@
                     <div class="header-action-btn">
                         <i class="fas fa-question-circle"></i>
                     </div>
-                    <div class="header-action-btn">
-                        <i class="fas fa-user"></i>
+                    <!-- User Profile Section -->
+                    <div class="user-profile" id="userProfile">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">User</div>
+                            <div class="user-role" id="userRole">Please log in</div>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                        
+                        <!-- Profile Dropdown -->
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </div>
+                            <div class="dropdown-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item logout-btn" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            
+                <!-- ... your header content ... -->
             </div>
 
-            <!-- Input Section -->
-            <div class="input-section">
-                <div class="input-grid">
-                    <div class="input-group">
-                        <label class="input-label">Budget</label>
-                        <select id="budgetId" class="input-field">
+            <!-- Dashboard Tabs (unchanged) -->
+            <div class="dashboard-tabs">
+                <!-- ... your tabs ... -->
+                 <div class="tab active" data-tab="overview">Overview</div>
+                <div class="tab" data-tab="budgets">Budgets</div>
+                <div class="tab" data-tab="timeseries">Time Series</div>
+                <div class="tab" data-tab="quarterly">Quarterly Insights</div>
+                <div class="tab" data-tab="monthly">Monthly Insights</div>
+                <div class="tab" data-tab="expenses">Register Expense</div>
+                <div class="tab" data-tab="disbursements">Register Disbursement</div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content active" id="overview-tab">
+                <!-- Login Prompt (unchanged) -->
+                 <!-- Login Prompt (shown when not logged in) -->
+                <div class="login-prompt" id="loginPrompt">
+                    <h3>Welcome to BudgetVision</h3>
+                    <p>Please log in to access the full dashboard features</p>
+                    <a href="login.html" class="login-btn">Login Now</a>
+                </div>
+
+                <!-- Dashboard Overview (shown when logged in) -->
+                <div id="dashboardOverview" style="display: none;">
+                    <!-- Budget Selector -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Select Budget</div>
+                        </div>
+                        <select id="overviewBudgetSelect" class="budget-selector">
                             <option value="">Loading budgets...</option>
                         </select>
-                        <div id="budgetLoading" class="spinner" style="display: inline-block; margin-left: 10px;"></div>
                     </div>
-                    <div class="input-group">
-                        <label class="input-label">Start Date</label>
-                        <input type="date" id="startDate" class="input-field" value="2023-01-01">
+
+                    <div class="dashboard-grid">
+                        <!-- Your stat cards (will be updated with real data) -->
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">TOTAL BUDGET</div>
+                                <div class="stat-icon bg-primary">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="totalBudget">UGX 0</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Overall allocation</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">TOTAL EXPENSES</div>
+                                <div class="stat-icon bg-warning">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="totalExpenses">UGX 0</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Current period</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">TOTAL DISBURSEMENTS</div>
+                                <div class="stat-icon bg-success">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="totalDisbursements">UGX 0</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Current period</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">BUDGET UTILIZATION</div>
+                                <div class="stat-icon bg-info">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="budgetUtilization">0%</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Efficiency rate</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label class="input-label">End Date</label>
-                        <input type="date" id="endDate" class="input-field" value="2023-12-31">
+
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Budget vs Actual Spending</div>
+                            <div class="section-actions">
+                                <button class="filter-btn active">Monthly</button>
+                                <button class="filter-btn">Quarterly</button>
+                                <button class="filter-btn">Yearly</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="budget-vs-actual-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
+                        <div class="chart-section">
+                            <div class="section-header">
+                                <div class="section-title">Expense Categories</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="expense-categories-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-section">
+                            <div class="section-header">
+                                <div class="section-title">Budget Health</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="budget-health-chart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <button class="generate-btn" onclick="fetchBudgetData()">
-                    <i class="fas fa-sync-alt"></i>
-                    Generate Report
-                </button>
             </div>
 
-            <!-- Stats Overview -->
-            <div class="dashboard-grid" id="metricsGrid">
-                <div class="loading" id="loadingMessage">Select a budget and date range to generate report</div>
-            </div>
-
-            <!-- Pie Charts Section -->
-            <div class="chart-section">
-                <div class="section-header">
-                    <div class="section-title">Budget Allocation Analysis</div>
-                </div>
-                <div class="charts-container">
-                    <div class="chart-wrapper">
-                        <h3>Budget Categories</h3>
-                        <canvas id="category-pie-chart"></canvas>
+            <!-- Other tabs remain unchanged -->
+              <!-- Budgets Tab -->
+            <div class="tab-content" id="budgets-tab">
+                <div class="form-section">
+                    <h3>Create New Budget</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Budget Name</label>
+                            <input type="text" class="form-input" placeholder="Enter budget name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (UGX)</label>
+                            <input type="number" class="form-input" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-select">
+                                <option value="">Select category</option>
+                                <option value="operations">Operations</option>
+                                <option value="development">Development</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="personnel">Personnel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fiscal Year</label>
+                            <select class="form-select">
+                                <option value="2023">2023</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="chart-wrapper">
-                        <h3>Budget Items</h3>
-                        <canvas id="item-pie-chart"></canvas>
+                    <button class="form-button">
+                        <i class="fas fa-plus"></i>
+                        Create Budget
+                    </button>
+                </div>
+
+                <div class="chart-section">
+                    <div class="section-header">
+                        <div class="section-title">Budget Overview</div>
+                        <div class="section-actions">
+                            <button class="filter-btn active">All</button>
+                            <button class="filter-btn">Active</button>
+                            <button class="filter-btn">Completed</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="budget-overview-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <div class="section-header">
+                        <div class="section-title">Budget List</div>
+                        <div class="section-actions">
+                            <button class="filter-btn">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Budget Name</th>
+                                <th>Category</th>
+                                <th>Allocated Amount</th>
+                                <th>Utilized</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Q1 Operations</td>
+                                <td>Operations</td>
+                                <td>UGX 50,000,000</td>
+                                <td>UGX 35,000,000</td>
+                                <td>UGX 15,000,000</td>
+                                <td><span class="badge positive">On Track</span></td>
+                            </tr>
+                            <tr>
+                                <td>Marketing Campaign</td>
+                                <td>Marketing</td>
+                                <td>UGX 25,000,000</td>
+                                <td>UGX 28,000,000</td>
+                                <td>UGX -3,000,000</td>
+                                <td><span class="badge negative">Over Budget</span></td>
+                            </tr>
+                            <tr>
+                                <td>Product Development</td>
+                                <td>Development</td>
+                                <td>UGX 75,000,000</td>
+                                <td>UGX 40,000,000</td>
+                                <td>UGX 35,000,000</td>
+                                <td><span class="badge positive">On Track</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Time Series Tab -->
+            <div class="tab-content" id="timeseries-tab">
+                <!-- Login Prompt (shown when not logged in) -->
+                <div class="login-prompt" id="timeseriesLoginPrompt">
+                    <h3>Welcome to BudgetVision</h3>
+                    <p>Please log in to access the Time Series features</p>
+                    <a href="login.html" class="login-btn">Login Now</a>
+                </div>
+
+                <!-- Time Series Content (shown when logged in) -->
+                <div id="timeseriesContent" style="display: none;">
+                    <!-- Input Section -->
+                    <div class="input-section">
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label class="input-label">Budget</label>
+                                <select id="timeseriesBudgetId" class="input-field">
+                                    <option value="">Loading budgets...</option>
+                                </select>
+                                <div id="timeseriesBudgetLoading" class="spinner" style="display: inline-block; margin-left: 10px;"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Start Date</label>
+                                <input type="date" id="startDate" class="input-field" value="2023-01-01">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">End Date</label>
+                                <input type="date" id="endDate" class="input-field" value="2023-12-31">
+                            </div>
+                        </div>
+                        <button class="generate-btn" onclick="fetchBudgetData()">
+                            <i class="fas fa-sync-alt"></i>
+                            Generate Report
+                        </button>
+                    </div>
+
+                    <!-- Stats Overview -->
+                    <div class="dashboard-grid" id="timeseriesMetricsGrid">
+                        <div class="loading" id="timeseriesLoadingMessage">Select a budget and date range to generate report</div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Expenditure Timeline</div>
+                            <div class="section-actions">
+                                <div class="toggle-container">
+                                    <span class="toggle-text">Line</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="timeseriesChartTypeToggle">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="toggle-text">Curve</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="time-series-chart"></canvas>
+                            <div id="quarterIndicators"></div>
+                        </div>
+                        <div class="quarter-tags" id="quarterTags"></div>
+                    </div>
+
+                    <!-- Category Analysis -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Category Analysis</div>
+                        </div>
+                        <div id="timeseriesCategoryAnalysisContent">
+                            <!-- Category analysis table will be inserted here -->
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Category Trend Chart Section -->
-            <div class="chart-section">
-                <div class="section-header">
-                    <div class="section-title">Category Trends Over Time</div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="category-trend-chart"></canvas>
+            <!-- Quarterly Insights Tab -->
+            <div class="tab-content" id="quarterly-tab">
+                <div class="chart-section">
+                    <div class="section-header">
+                        <div class="section-title">Quarterly Budget Insights</div>
+                        <div class="section-actions">
+                            <select class="form-select" style="width: auto;">
+                                <option>Q1 2023</option>
+                                <option>Q2 2023</option>
+                                <option>Q3 2023</option>
+                                <option>Q4 2023</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="quarterly-chart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Category Analysis -->
-            <div class="chart-section">
-                <div class="section-header">
-                    <div class="section-title">Category Analysis</div>
+            <!-- Monthly Insights Tab -->
+            <div class="tab-content" id="monthly-tab">
+                <!-- Login Prompt (shown when not logged in) -->
+                <div class="login-prompt" id="monthlyLoginPrompt">
+                    <h3>Welcome to BudgetVision</h3>
+                    <p>Please log in to access the Monthly Insights features</p>
+                    <a href="login.html" class="login-btn">Login Now</a>
                 </div>
-                <div id="categoryAnalysisContent">
-                    <!-- Category analysis table will be inserted here -->
+
+                <!-- Monthly Insights Content (shown when logged in) -->
+                <div id="monthlyContent" style="display: none;">
+                    <!-- Input Section -->
+                    <div class="input-section">
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label class="input-label">Budget</label>
+                                <select id="monthlyBudgetId" class="input-field">
+                                    <option value="">Loading budgets...</option>
+                                </select>
+                                <div id="monthlyBudgetLoading" class="spinner" style="display: inline-block; margin-left: 10px;"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Quarter (YYYY-MM)</label>
+                                <input type="text" id="quarterDate" class="input-field" placeholder="e.g. 2023-07">
+                            </div>
+                        </div>
+                        <button class="generate-btn" onclick="fetchMetrics()">
+                            <i class="fas fa-sync-alt"></i>
+                            Generate Report
+                        </button>
+                    </div>
+
+                    <!-- Stats Overview -->
+                    <div class="dashboard-grid" id="monthlyMetricsGrid">
+                        <div class="loading" id="monthlyLoadingMessage">Select a budget and enter quarter date to generate report</div>
+                    </div>
+
+                    <!-- Category Analysis -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Category Analysis</div>
+                        </div>
+                        <div id="monthlyCategoryAnalysisContent">
+                            <!-- Category analysis table will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Budget Visualization</div>
+                        </div>
+                        <div class="charts-container" id="chartsContainer">
+                            <div class="chart-wrapper">
+                                <h3>Budget Categories</h3>
+                                <canvas id="category-chart"></canvas>
+                            </div>
+                            <div class="chart-wrapper">
+                                <h3>Budget Items</h3>
+                                <canvas id="item-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Spending Graph -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <div class="section-title">Category Spending Analysis</div>
+                            <div class="section-actions">
+                                <div class="toggle-container">
+                                    <span class="toggle-text">Line</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="monthlyChartTypeToggle" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="toggle-text">Curve</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-graph-container">
+                            <canvas id="category-graph"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Expenses Tab -->
+            <div class="tab-content" id="expenses-tab">
+                <div class="form-section">
+                    <h3>Register New Expense</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Expense Description</label>
+                            <input type="text" class="form-input" placeholder="Enter expense description">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (UGX)</label>
+                            <input type="number" class="form-input" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-select">
+                                <option value="">Select category</option>
+                                <option value="operations">Operations</option>
+                                <option value="development">Development</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="personnel">Personnel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    <button class="form-button">
+                        <i class="fas fa-plus"></i>
+                        Register Expense
+                    </button>
+                </div>
+
+                <div class="chart-section">
+                    <div class="section-header">
+                        <div class="section-title">Recent Expenses</div>
+                        <div class="section-actions">
+                            <button class="filter-btn">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2023-10-15</td>
+                                <td>Office Supplies</td>
+                                <td>Operations</td>
+                                <td>UGX 450,000</td>
+                                <td><span class="badge positive">Approved</span></td>
+                            </tr>
+                            <tr>
+                                <td>2023-10-12</td>
+                                <td>Marketing Campaign</td>
+                                <td>Marketing</td>
+                                <td>UGX 2,500,000</td>
+                                <td><span class="badge positive">Approved</span></td>
+                            </tr>
+                            <tr>
+                                <td>2023-10-10</td>
+                                <td>Software Licenses</td>
+                                <td>Development</td>
+                                <td>UGX 1,200,000</td>
+                                <td><span class="badge">Pending</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Disbursements Tab -->
+            <div class="tab-content" id="disbursements-tab">
+                <div class="form-section">
+                    <h3>Register New Disbursement</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Disbursement Description</label>
+                            <input type="text" class="form-input" placeholder="Enter disbursement description">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (UGX)</label>
+                            <input type="number" class="form-input" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Budget Category</label>
+                            <select class="form-select">
+                                <option value="">Select category</option>
+                                <option value="operations">Operations</option>
+                                <option value="development">Development</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="personnel">Personnel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    <button class="form-button">
+                        <i class="fas fa-plus"></i>
+                        Register Disbursement
+                    </button>
+                </div>
+
+                <div class="chart-section">
+                    <div class="section-header">
+                        <div class="section-title">Recent Disbursements</div>
+                        <div class="section-actions">
+                            <button class="filter-btn">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Budget Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2023-10-16</td>
+                                <td>Vendor Payment</td>
+                                <td>Operations</td>
+                                <td>UGX 3,500,000</td>
+                                <td><span class="badge positive">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2023-10-14</td>
+                                <td>Project Funding</td>
+                                <td>Development</td>
+                                <td>UGX 10,000,000</td>
+                                <td><span class="badge positive">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2023-10-11</td>
+                                <td>Marketing Advance</td>
+                                <td>Marketing</td>
+                                <td>UGX 5,000,000</td>
+                                <td><span class="badge">Processing</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <!-- ... -->
         </div>
     </div>
 
@@ -733,13 +1597,11 @@
         // Register plugins
         Chart.register(ChartDataLabels);
         
-        // Store the budget data
-        let budgetData = null;
+        // Global variables
+        let allBudgets = [];
         let currentBudgetId = null;
-        let currentChart = null;
-        let categoryPieChart = null;
-        let itemPieChart = null;
-        let categoryTrendChart = null;
+        let currentBudgetData = null;
+        let currentExpensesData = null;
         
         // Helper function to format currency
         function formatCurrency(value) {
@@ -752,53 +1614,277 @@
         }
         
         // Helper function to show error messages
-        function showError(message) {
-            const metricsGrid = document.getElementById('metricsGrid');
-            metricsGrid.innerHTML = `<div class="error-message">${message}</div>`;
+        function showError(message, elementId) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="error-message">${message}</div>`;
         }
         
-        // Generate a color scheme based on category names
-        function generateColorScheme(categories) {
-            const baseColors = [
-                '#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2',
-                '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
-                '#4361ee', '#f72585', '#4cc9f0', '#3a0ca3', '#7209b7'
-            ];
+        // Check authentication status and update UI accordingly
+        function checkAuthStatus() {
+            // ... your existing implementation ...
+             const token = localStorage.getItem('authToken');
+            const loginPrompt = document.getElementById('loginPrompt');
+            const dashboardOverview = document.getElementById('dashboardOverview');
+            const timeseriesLoginPrompt = document.getElementById('timeseriesLoginPrompt');
+            const timeseriesContent = document.getElementById('timeseriesContent');
+            const monthlyLoginPrompt = document.getElementById('monthlyLoginPrompt');
+            const monthlyContent = document.getElementById('monthlyContent');
+            const userNameElement = document.getElementById('userName');
+            const userRoleElement = document.getElementById('userRole');
+            const userAvatar = document.getElementById('userAvatar');
             
-            const scheme = {};
-            categories.forEach((category, index) => {
-                const baseColor = baseColors[index % baseColors.length];
-                scheme[category] = [
-                    baseColor,
-                    lightenColor(baseColor, 30),
-                    lightenColor(baseColor, 60)
-                ];
-            });
-            return scheme;
+            if (token) {
+                // User is logged in, fetch profile
+                fetchUserProfile();
+                loginPrompt.style.display = 'none';
+                dashboardOverview.style.display = 'block';
+                timeseriesLoginPrompt.style.display = 'none';
+                timeseriesContent.style.display = 'block';
+                monthlyLoginPrompt.style.display = 'none';
+                monthlyContent.style.display = 'block';
+            } else {
+                // User is not logged in
+                loginPrompt.style.display = 'block';
+                dashboardOverview.style.display = 'none';
+                timeseriesLoginPrompt.style.display = 'block';
+                timeseriesContent.style.display = 'none';
+                monthlyLoginPrompt.style.display = 'block';
+                monthlyContent.style.display = 'none';
+                userNameElement.textContent = 'User';
+                userRoleElement.textContent = 'Please log in';
+                userAvatar.textContent = 'U';
+            }
         }
-
-        // Helper function to lighten a color
-        function lightenColor(color, percent) {
-            const num = parseInt(color.replace('#', ''), 16);
-            const amt = Math.round(2.55 * percent);
-            const R = (num >> 16) + amt;
-            const G = (num >> 8 & 0x00FF) + amt;
-            const B = (num & 0x0000FF) + amt;
-            return '#' + (
-                0x1000000 + (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-                (B < 255 ? (B < 1 ? 0 : B) : 255)
-            ).toString(16).slice(1);
+        
+        // Fetch user profile from endpoint
+        async function fetchUserProfile() {
+            // ... your existing implementation ...
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                checkAuthStatus();
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://192.168.73.170:5000/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const responseData = await response.json();
+                
+                // Check if the API returned an error
+                if (responseData.status === false) {
+                    throw new Error(responseData.log || 'API returned an error');
+                }
+                
+                // Update UI with user data
+                document.getElementById('userName').textContent = responseData.userName;
+                document.getElementById('userRole').textContent = responseData.role;
+                
+                // Set avatar initials
+                const nameParts = responseData.userName.split(' ');
+                let initials = '';
+                if (nameParts.length === 1) {
+                    initials = nameParts[0].charAt(0);
+                } else {
+                    initials = nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0);
+                }
+                document.getElementById('userAvatar').textContent = initials.toUpperCase();
+                
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+                // If token is invalid, clear it and show login prompt
+                localStorage.removeItem('authToken');
+                checkAuthStatus();
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            // ... your existing implementation ...
+            localStorage.removeItem('authToken');
+            checkAuthStatus();
+        }
+        
+        // Tab switching functionality
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab, .nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+        
+        // Tab switching functionality
+        function setupTabs() {
+            // ... your existing implementation ...
+            localStorage.removeItem('authToken');
+            checkAuthStatus();
+        }
+        
+        // Tab switching functionality
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab, .nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+        
+        // Initialize charts for overview
+        function initCharts() {
+            // Budget vs Actual Chart
+            const budgetVsActualCtx = document.getElementById('budget-vs-actual-chart').getContext('2d');
+            window.budgetVsActualChart = new Chart(budgetVsActualCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Budget',
+                            data: [],
+                            backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                        },
+                        {
+                            label: 'Actual',
+                            data: [],
+                            backgroundColor: 'rgba(76, 201, 240, 0.7)',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#e9ecef'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e9ecef',
+                                callback: function(value) {
+                                    return 'UGX ' + value + 'M';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e9ecef'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Expense Categories Chart
+            const expenseCategoriesCtx = document.getElementById('expense-categories-chart').getContext('2d');
+            window.expenseCategoriesChart = new Chart(expenseCategoriesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#e9ecef'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Budget Health Chart
+            const budgetHealthCtx = document.getElementById('budget-health-chart').getContext('2d');
+            window.budgetHealthChart = new Chart(budgetHealthCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['On Track', 'At Risk', 'Over Budget'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(241, 196, 15, 0.8)',
+                            'rgba(231, 76, 60, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e9ecef'
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Fetch all budgets from the server
         async function fetchBudgets() {
-            const budgetSelect = document.getElementById('budgetId');
-            const budgetLoading = document.getElementById('budgetLoading');
-            
-            budgetSelect.innerHTML = '<option value="">Loading budgets...</option>';
-            budgetLoading.style.display = 'inline-block';
-            
             try {
                 const response = await fetch('http://192.168.73.170:5000/getBudget', {
                     method: 'POST',
@@ -818,59 +1904,63 @@
                     throw new Error(responseData.log || 'API returned an error');
                 }
                 
-                // Clear the loading message
-                budgetSelect.innerHTML = '<option value="">Select a budget</option>';
+                // Store all budgets
+                allBudgets = responseData.data || [];
                 
-                // Add each budget to the dropdown
-                if (responseData.data && responseData.data.length > 0) {
-                    responseData.data.forEach(budget => {
-                        const option = document.createElement('option');
-                        option.value = budget.budgetId;
-                        option.textContent = `${budget.vote} (Approved: ${budget.dateOfApproval})`;
-                        budgetSelect.appendChild(option);
-                    });
-                } else {
-                    budgetSelect.innerHTML = '<option value="">No budgets available</option>';
-                }
+                // Populate budget dropdowns
+                const budgetSelects = [
+                    document.getElementById('overviewBudgetSelect'),
+                    document.getElementById('monthlyBudgetId'),
+                    document.getElementById('timeseriesBudgetId')
+                ];
+                
+                budgetSelects.forEach(select => {
+                    if (select) {
+                        select.innerHTML = '<option value="">Select a budget</option>';
+                        
+                        allBudgets.forEach(budget => {
+                            const option = document.createElement('option');
+                            option.value = budget.budgetId;
+                            option.textContent = `${budget.vote} (${budget.dateOfApproval})`;
+                            select.appendChild(option);
+                        });
+                        
+                        // Select the most recent budget by default
+                        if (allBudgets.length > 0) {
+                            // Sort by dateOfApproval to find the most recent
+                            const sortedBudgets = [...allBudgets].sort((a, b) => 
+                                new Date(b.dateOfApproval) - new Date(a.dateOfApproval)
+                            );
+                            select.value = sortedBudgets[0].budgetId;
+                            
+                            // If this is the overview budget select, load its data
+                            if (select.id === 'overviewBudgetSelect') {
+                                loadBudgetData(sortedBudgets[0].budgetId);
+                            }
+                        }
+                    }
+                });
             } catch (error) {
                 console.error("Error fetching budgets:", error);
-                budgetSelect.innerHTML = '<option value="">Error loading budgets</option>';
-                showError(`Failed to fetch budgets: ${error.message}. Please ensure the API server is running.`);
-            } finally {
-                budgetLoading.style.display = 'none';
+                const budgetSelects = [
+                    document.getElementById('overviewBudgetSelect'),
+                    document.getElementById('monthlyBudgetId'),
+                    document.getElementById('timeseriesBudgetId')
+                ];
+                
+                budgetSelects.forEach(select => {
+                    if (select) {
+                        select.innerHTML = '<option value="">Error loading budgets</option>';
+                    }
+                });
             }
         }
         
-        // Fetch all quarter data for a budget
-        async function fetchBudgetData() {
-            const budgetSelect = document.getElementById('budgetId');
-            const budgetId = budgetSelect.value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            
-            // Validate inputs
-            if (!budgetId) {
-                showError("Please select a budget.");
-                return;
-            }
-            
-            if (!startDate || !endDate) {
-                showError("Please select both start and end dates.");
-                return;
-            }
-            
-            if (new Date(startDate) > new Date(endDate)) {
-                showError("End date must be after start date.");
-                return;
-            }
-            
-            currentBudgetId = budgetId;
-            const metricsGrid = document.getElementById('metricsGrid');
-            metricsGrid.innerHTML = '<div class="loading">Loading budget data...</div>';
-            
+        // Fetch expenses for a specific budget
+        async function fetchExpensesByBudgetId(budgetId) {
             try {
-                // Fetch data from API endpoint using POST
-                const response = await fetch('http://192.168.73.170:5000/getQuarterMetrics', {
+                // Replace with your actual endpoint for fetching expenses by budgetId
+                const response = await fetch('http://192.168.73.170:5000/getExpense', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -889,561 +1979,244 @@
                     throw new Error(responseData.log || 'API returned an error');
                 }
                 
-                // Use the response data directly
-                budgetData = responseData;
-                
-                // Process the data and render the charts
-                processAndRenderCharts(startDate, endDate);
+                return responseData.data || [];
             } catch (error) {
-                console.error("Error fetching budget data:", error);
-                showError(`Failed to fetch data: ${error.message}. Please ensure the API server is running.`);
+                console.error("Error fetching expenses:", error);
+                return [];
             }
         }
         
-        function processAndRenderCharts(startDate, endDate) {
-            if (!budgetData) {
-                showError("No budget data available.");
-                return;
-            }
+        // Load budget data and update the overview
+        async function loadBudgetData(budgetId) {
+            currentBudgetId = budgetId;
             
-            // Convert input dates to Date objects for comparison
-            const startDateObj = new Date(startDate);
-            const endDateObj = new Date(endDate);
+            // Find the selected budget
+            currentBudgetData = allBudgets.find(b => b.budgetId === budgetId);
+            if (!currentBudgetData) return;
             
-            // Filter quarters that fall within the selected date range
-            const quartersInRange = [];
-            let allDates = [];
-            let allAmounts = [];
-            let quarterInfo = {};
-            let categoryData = {};
+            // Fetch expenses for this budget
+            currentExpensesData = await fetchExpensesByBudgetId(budgetId);
             
-            // Create a mapping of quarter IDs to their data
-            const quarterMap = {};
-            for (const [qId, qData] of Object.entries(budgetData)) {
-                if (qId === 'status') continue; // Skip status field
-                
-                quarterMap[qId] = qData;
-                const quarterStart = new Date(qData.quarterStartDate);
-                const quarterEnd = new Date(qData.quarterEndDate);
-                
-                // Check if quarter overlaps with selected date range
-                if ((quarterStart <= endDateObj && quarterEnd >= startDateObj)) {
-                    // Create quarter label
-                    const quarterLabel = `${formatDateDisplay(qData.quarterStartDate)} to ${formatDateDisplay(qData.quarterEndDate)}`;
-                    
-                    // Add to quartersInRange with proper labels
-                    quartersInRange.push({
-                        id: qId,
-                        data: qData,
-                        startDate: qData.quarterStartDate,
-                        endDate: qData.quarterEndDate,
-                        quarterLabel: quarterLabel
-                    });
-                    
-                    // Process dates and amounts for this quarter
-                    if (qData.datesOfExpense && qData.amountsSpent) {
-                        qData.datesOfExpense.forEach((date, index) => {
-                            const expenseDate = new Date(date);
-                            if (expenseDate >= startDateObj && expenseDate <= endDateObj) {
-                                allDates.push(date);
-                                allAmounts.push(qData.amountsSpent[index]);
-                                quarterInfo[date] = qId; // Store quarter ID for this date
-                            }
-                        });
-                    }
-                    
-                    // Aggregate category data
-                    if (qData.category_analysis) {
-                        for (const [category, data] of Object.entries(qData.category_analysis)) {
-                            if (!categoryData[category]) {
-                                categoryData[category] = {
-                                    actual: 0,
-                                    planned: 0,
-                                    items: {}
-                                };
-                            }
-                            categoryData[category].actual += data.actual || 0;
-                            categoryData[category].planned += data.planned || 0;
-                            
-                            // Aggregate item data
-                            if (data.items) {
-                                for (const [item, itemData] of Object.entries(data.items)) {
-                                    if (!categoryData[category].items[item]) {
-                                        categoryData[category].items[item] = {
-                                            actual: 0,
-                                            planned: 0
-                                        };
-                                    }
-                                    categoryData[category].items[item].actual += itemData.actual || 0;
-                                    categoryData[category].items[item].planned += itemData.planned || 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Update the metrics
+            updateOverviewMetrics();
             
-            if (quartersInRange.length === 0) {
-                showError("No quarters found within the selected date range.");
-                return;
-            }
-            
-            // Sort dates chronologically
-            const sortedIndices = allDates
-                .map((date, index) => ({ date, index }))
-                .sort((a, b) => new Date(a.date) - new Date(b.date))
-                .map(item => item.index);
-                
-            const sortedDates = sortedIndices.map(i => allDates[i]);
-            const sortedAmounts = sortedIndices.map(i => allAmounts[i]);
-            const sortedQuarterIds = sortedIndices.map(i => quarterInfo[allDates[i]]);
-            
-            // Get unique quarter IDs for legend
-            const uniqueQuarterIds = [...new Set(sortedQuarterIds)];
-            
-            // Get the actual date range from the data (not from input)
-            let actualStartDate = sortedDates.length > 0 ? sortedDates[0] : startDate;
-            let actualEndDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : endDate;
-            
-            // Render the charts
-            renderPieCharts(categoryData);
-            renderCategoryTrendChart(quartersInRange, categoryData);
-            
-            // Render metrics and category comparison
-            renderMetricsAndComparison(quartersInRange);
+            // Update the charts
+            updateOverviewCharts();
         }
         
-        // Format date for display (MMM DD, YYYY)
-        function formatDateDisplay(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-        
-        // Render the pie charts
-        function renderPieCharts(categoryData) {
-            // Destroy previous charts if they exist
-            if (categoryPieChart) {
-                categoryPieChart.destroy();
+        // Update the overview metrics with real data
+        function updateOverviewMetrics() {
+            if (!currentBudgetData) return;
+            
+            const totalBudget = currentBudgetData.planned || 0;
+            const totalExpenses = calculateTotalExpenses();
+            const totalDisbursements = calculateTotalDisbursements();
+            const utilization = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
+            
+            document.getElementById('totalBudget').textContent = formatCurrency(totalBudget);
+            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('totalDisbursements').textContent = formatCurrency(totalDisbursements);
+            document.getElementById('budgetUtilization').textContent = utilization.toFixed(2) + '%';
+            
+            // Update the change indicators
+            const expenseChange = document.querySelector('#totalExpenses + .stat-change');
+            const disbursementChange = document.querySelector('#totalDisbursements + .stat-change');
+            
+            if (expenseChange) {
+                expenseChange.className = 'stat-change ' + (totalExpenses > totalBudget ? 'negative' : 'positive');
+                expenseChange.querySelector('span').textContent = totalExpenses > totalBudget ? 'Over budget' : 'Within budget';
             }
-            if (itemPieChart) {
-                itemPieChart.destroy();
-            }
             
-            const categories = Object.keys(categoryData);
-            const colorScheme = generateColorScheme(categories);
-            
-            // Prepare data for Category Pie Chart
-            const categoryLabels = categories;
-            const categoryChartData = categories.map(cat => categoryData[cat].actual || 0);
-            const categoryColors = categories.map(cat => colorScheme[cat]?.[0] || '#cccccc');
-            const categoryTotal = categoryChartData.reduce((a, b) => a + b, 0);
-            
-            // Create Category Pie Chart
-            const categoryCtx = document.getElementById('category-pie-chart').getContext('2d');
-            categoryPieChart = new Chart(categoryCtx, {
-                type: 'pie',
-                data: {
-                    labels: categoryLabels,
-                    datasets: [{
-                        data: categoryChartData,
-                        backgroundColor: categoryColors,
-                        borderColor: '#fff',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const percentage = categoryTotal > 0 ? Math.round((value / categoryTotal) * 100) : 0;
-                                    const variance = categoryData[label]?.planned - value || 0;
-                                    return [
-                                        `${label}`,
-                                        `Amount: ${formatCurrency(value)}`,
-                                        `Percentage: ${percentage}%`,
-                                        `Variance: ${formatCurrency(variance)}`
-                                    ];
-                                }
-                            }
-                        },
-                        datalabels: {
-                            formatter: (value, context) => {
-                                const percentage = categoryTotal > 0 ? Math.round((value / categoryTotal) * 100) : 0;
-                                return percentage >= 5 ? `${percentage}%` : '';
-                            },
-                            color: '#fff',
-                            font: {
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-            
-            // Prepare data for Items Pie Chart
-            const itemLabels = [];
-            const itemChartData = [];
-            const itemColors = [];
-            
-            categories.forEach(category => {
-                const items = categoryData[category].items || {};
-                
-                Object.entries(items).forEach(([itemName, itemDataObj]) => {
-                    itemLabels.push(`${itemName} (${category})`);
-                    itemChartData.push(itemDataObj.actual || 0);
-                    itemColors.push(colorScheme[category]?.[1] || '#dddddd');
-                });
-            });
-            
-            // Only create items chart if there are items
-            if (itemLabels.length > 0) {
-                const itemTotal = itemChartData.reduce((a, b) => a + b, 0);
-                const itemCtx = document.getElementById('item-pie-chart').getContext('2d');
-                
-                itemPieChart = new Chart(itemCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: itemLabels,
-                        datasets: [{
-                            data: itemChartData,
-                            backgroundColor: itemColors,
-                            borderColor: '#fff',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    boxWidth: 12,
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw || 0;
-                                        const percentage = itemTotal > 0 ? Math.round((value / itemTotal) * 100) : 0;
-                                        return [
-                                            `${label}`,
-                                            `Amount: ${formatCurrency(value)}`,
-                                            `Percentage: ${percentage}%`
-                                        ];
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                formatter: (value, context) => {
-                                    const percentage = itemTotal > 0 ? Math.round((value / itemTotal) * 100) : 0;
-                                    return percentage >= 5 ? `${percentage}%` : '';
-                                },
-                                color: '#fff',
-                                font: {
-                                    weight: 'bold',
-                                    size: 10
-                                }
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            } else {
-                document.getElementById('item-pie-chart').parentElement.innerHTML = '<div class="loading">No item data available</div>';
+            if (disbursementChange) {
+                disbursementChange.className = 'stat-change ' + (totalDisbursements > totalBudget ? 'negative' : 'positive');
+                disbursementChange.querySelector('span').textContent = totalDisbursements > totalBudget ? 'Over disbursed' : 'Within budget';
             }
         }
         
-        // Render the category trend chart
-        function renderCategoryTrendChart(quartersInRange, categoryData) {
-            if (categoryTrendChart) {
-                categoryTrendChart.destroy();
-            }
+        // Calculate total expenses from expenses data
+        function calculateTotalExpenses() {
+            if (!currentExpensesData || !currentExpensesData.length) return 0;
             
-            const categories = Object.keys(categoryData);
-            const colorScheme = generateColorScheme(categories);
+            return currentExpensesData.reduce((total, expense) => {
+                return total + (expense.amount || 0);
+            }, 0);
+        }
+        
+        // Calculate total disbursements (for now, using the same as expenses)
+        function calculateTotalDisbursements() {
+            // If you have a separate disbursements endpoint, use that data instead
+            return calculateTotalExpenses();
+        }
+        
+        // Update the overview charts with real data
+        function updateOverviewCharts() {
+            if (!currentBudgetData) return;
             
-            // Prepare data for each category across quarters
-            const datasets = [];
+            // Update Budget vs Actual chart
+            updateBudgetVsActualChart();
             
-            categories.forEach(category => {
-                const categorySpending = quartersInRange.map(quarter => {
-                    const quarterData = quarter.data;
-                    return quarterData.category_analysis && quarterData.category_analysis[category] 
-                        ? quarterData.category_analysis[category].actual || 0 
-                        : 0;
-                });
-                
-                datasets.push({
-                    label: category,
-                    data: categorySpending,
-                    backgroundColor: colorScheme[category]?.[0] + '40',
-                    borderColor: colorScheme[category]?.[0],
-                    borderWidth: 3,
-                    pointBackgroundColor: colorScheme[category]?.[0],
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    tension: 0.4,
-                    fill: true
-                });
-            });
+            // Update Expense Categories chart
+            updateExpenseCategoriesChart();
             
-            // Create category trend chart
-            const ctx = document.getElementById('category-trend-chart').getContext('2d');
-            categoryTrendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: quartersInRange.map(q => `Q${q.id.replace('qId', '')}`),
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Amount (UGX)',
-                                font: {
-                                    weight: 'bold',
-                                    size: 14
-                                }
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                },
-                                font: {
-                                    size: 12
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0,0,0,0.05)'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Quarter',
-                                font: {
-                                    weight: 'bold',
-                                    size: 14
-                                }
-                            },
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.dataset.label || '';
-                                    const value = context.raw || 0;
-                                    return `${label}: ${formatCurrency(value)}`;
-                                }
-                            },
-                            backgroundColor: 'rgba(255,255,255,0.9)',
-                            titleColor: '#333',
-                            bodyColor: '#333',
-                            borderColor: 'rgba(0,0,0,0.1)',
-                            borderWidth: 1,
-                            padding: 12,
-                            boxPadding: 6
-                        },
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                boxWidth: 15,
-                                padding: 20,
-                                font: {
-                                    size: 13
-                                },
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
-                        }
-                    },
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeOutQuart'
+            // Update Budget Health chart
+            updateBudgetHealthChart();
+        }
+        
+        // Update Budget vs Actual chart
+        function updateBudgetVsActualChart() {
+            if (!window.budgetVsActualChart || !currentBudgetData || !currentExpensesData) return;
+            
+            // For demonstration, we'll use monthly data
+            // You would need to adapt this based on your actual data structure
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const budgetData = [];
+            const actualData = [];
+            
+            // Calculate monthly budget (evenly distributed for demonstration)
+            const monthlyBudget = currentBudgetData.planned / 12;
+            
+            // Calculate monthly expenses
+            const monthlyExpenses = new Array(12).fill(0);
+            
+            currentExpensesData.forEach(expense => {
+                if (expense.date) {
+                    const month = new Date(expense.date).getMonth();
+                    if (month >= 0 && month < 12) {
+                        monthlyExpenses[month] += expense.amount || 0;
                     }
                 }
             });
+            
+            // Prepare chart data
+            for (let i = 0; i < 6; i++) { // Show first 6 months for demonstration
+                budgetData.push(monthlyBudget);
+                actualData.push(monthlyExpenses[i] || 0);
+            }
+            
+            // Update the chart
+            window.budgetVsActualChart.data.labels = months.slice(0, 6);
+            window.budgetVsActualChart.data.datasets[0].data = budgetData;
+            window.budgetVsActualChart.data.datasets[1].data = actualData;
+            window.budgetVsActualChart.update();
         }
         
-        // Render metrics and category comparison
-        function renderMetricsAndComparison(quartersInRange) {
-            const metricsGrid = document.getElementById('metricsGrid');
-            const categoryAnalysisContent = document.getElementById('categoryAnalysisContent');
+        // Update Expense Categories chart
+        function updateExpenseCategoriesChart() {
+            if (!window.expenseCategoriesChart || !currentExpensesData) return;
             
-            // Calculate totals across all quarters in range
-            let totalPlanned = 0;
-            let totalExpended = 0;
-            const categoryAnalysis = {};
+            // Group expenses by category
+            const categories = {};
             
-            quartersInRange.forEach(quarter => {
-                const qData = quarter.data;
-                totalPlanned += qData.financial.planned || 0;
-                totalExpended += qData.financial.expended || 0;
-                
-                // Aggregate category data
-                for (const [category, data] of Object.entries(qData.category_analysis || {})) {
-                    if (!categoryAnalysis[category]) {
-                        categoryAnalysis[category] = { actual: 0, planned: 0 };
-                    }
-                    categoryAnalysis[category].actual += data.actual || 0;
-                    categoryAnalysis[category].planned += data.planned || 0;
+            currentExpensesData.forEach(expense => {
+                const category = expense.category || 'Uncategorized';
+                if (!categories[category]) {
+                    categories[category] = 0;
                 }
+                categories[category] += expense.amount || 0;
             });
             
-            // Calculate utilization percentage
-            const utilizationPercentage = totalPlanned > 0 ? (totalExpended / totalPlanned) * 100 : 0;
+            // Prepare chart data
+            const labels = Object.keys(categories);
+            const data = Object.values(categories);
             
-            // Calculate variance
-            const variance = totalPlanned - totalExpended;
+            // Generate colors for each category
+            const colors = [
+                'rgba(67, 97, 238, 0.8)',
+                'rgba(76, 201, 240, 0.8)',
+                'rgba(247, 37, 133, 0.8)',
+                'rgba(86, 11, 173, 0.8)',
+                'rgba(58, 12, 163, 0.8)',
+                'rgba(114, 9, 183, 0.8)'
+            ];
             
-            // Create metrics cards
-            metricsGrid.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-title">TOTAL BUDGET</div>
-                        <div class="stat-icon bg-primary">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                    </div>
-                    <div class="stat-value">${formatCurrency(totalPlanned)}</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>Budget allocation</span>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-title">EXPENDITURE</div>
-                        <div class="stat-icon bg-success">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                    </div>
-                    <div class="stat-value">${formatCurrency(totalExpended)}</div>
-                    <div class="stat-change ${totalExpended < totalPlanned ? 'positive' : 'negative'}">
-                        <i class="fas ${totalExpended < totalPlanned ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
-                        <span>${totalExpended < totalPlanned ? 'Under budget' : 'Over budget'}</span>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-title">UTILIZATION</div>
-                        <div class="stat-icon bg-warning">
-                            <i class="fas fa-percentage"></i>
-                        </div>
-                    </div>
-                    <div class="stat-value">${utilizationPercentage.toFixed(2)}%</div>
-                    <div class="stat-change ${utilizationPercentage > 100 ? 'negative' : 'positive'}">
-                        <i class="fas ${utilizationPercentage > 100 ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
-                        <span>${utilizationPercentage > 100 ? 'Over Budget' : 'On Track'}</span>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-title">VARIANCE</div>
-                        <div class="stat-icon bg-info">
-                            <i class="fas fa-piggy-bank"></i>
-                        </div>
-                    </div>
-                    <div class="stat-value">${formatCurrency(variance)}</div>
-                    <div class="stat-change ${variance >= 0 ? 'positive' : 'negative'}">
-                        <i class="fas ${variance >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-                        <span>${variance >= 0 ? 'Savings' : 'Overspend'}</span>
-                    </div>
-                </div>
-            `;
-            
-            // Create category comparison table if we have category data
-            if (Object.keys(categoryAnalysis).length > 0) {
-                let tableHTML = `
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>Planned</th>
-                                <th>Actual</th>
-                                <th>Variance</th>
-                                <th>Utilization</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                
-                for (const [category, data] of Object.entries(categoryAnalysis)) {
-                    const variance = data.planned - data.actual;
-                    const varianceClass = variance >= 0 ? 'positive' : 'negative';
-                    const utilization = data.planned > 0 ? (data.actual / data.planned) * 100 : 0;
-                    
-                    tableHTML += `
-                        <tr>
-                            <td>${category}</td>
-                            <td>${formatCurrency(data.planned)}</td>
-                            <td>${formatCurrency(data.actual)}</td>
-                            <td><span class="badge ${varianceClass}">${formatCurrency(variance)}</span></td>
-                            <td>${utilization.toFixed(2)}%</td>
-                        </tr>
-                    `;
-                }
-                
-                // Add total row
-                tableHTML += `
-                    <tr style="font-weight: bold;">
-                        <td>Total</td>
-                        <td>${formatCurrency(totalPlanned)}</td>
-                        <td>${formatCurrency(totalExpended)}</td>
-                        <td><span class="badge ${variance >= 0 ? 'positive' : 'negative'}">${formatCurrency(variance)}</span></td>
-                        <td>${utilizationPercentage.toFixed(2)}%</td>
-                    </tr>
-                `;
-                
-                tableHTML += `</tbody></table>`;
-                categoryAnalysisContent.innerHTML = tableHTML;
-            } else {
-                categoryAnalysisContent.innerHTML = '<div class="loading">No category data available</div>';
-            }
+            // Update the chart
+            window.expenseCategoriesChart.data.labels = labels;
+            window.expenseCategoriesChart.data.datasets[0].data = data;
+            window.expenseCategoriesChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+            window.expenseCategoriesChart.update();
         }
         
-        // Initialize by fetching budgets
-        window.onload = function() {
-            // Set default dates
-            const today = new Date();
-            const lastYear = new Date(today.getFullYear() - 1, 0, 1);
-            document.getElementById('startDate').valueAsDate = lastYear;
-            document.getElementById('endDate').valueAsDate = today;
+        // Update Budget Health chart
+        function updateBudgetHealthChart() {
+            if (!window.budgetHealthChart || !currentBudgetData) return;
             
-            // Fetch budgets for the dropdown
+            const totalBudget = currentBudgetData.planned || 0;
+            const totalExpenses = calculateTotalExpenses();
+            
+            // Calculate budget health percentages
+            let onTrack = 0;
+            let atRisk = 0;
+            let overBudget = 0;
+            
+            if (totalBudget > 0) {
+                const utilization = (totalExpenses / totalBudget) * 100;
+                
+                if (utilization <= 70) {
+                    onTrack = utilization;
+                } else if (utilization <= 90) {
+                    onTrack = 70;
+                    atRisk = utilization - 70;
+                } else if (utilization <= 100) {
+                    onTrack = 70;
+                    atRisk = 20;
+                    overBudget = utilization - 90;
+                } else {
+                    onTrack = 70;
+                    atRisk = 20;
+                    overBudget = 10; // Cap at 100% for visualization
+                }
+            }
+            
+            // Update the chart
+            window.budgetHealthChart.data.datasets[0].data = [onTrack, atRisk, overBudget];
+            window.budgetHealthChart.update();
+        }
+        
+        // Initialize the dashboard
+        function initDashboard() {
+            checkAuthStatus();
+            setupTabs();
+            initCharts();
+            
+            // Set up user profile dropdown toggle
+            const userProfile = document.getElementById('userProfile');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            if (userProfile) {
+                userProfile.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('show');
+                });
+            }
+            
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', function() {
+                profileDropdown.classList.remove('show');
+            });
+            
+            // Set up logout button
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    logout();
+                });
+            }
+            
+            // Fetch budgets
             fetchBudgets();
+            
+            // Set up budget selector change event
+            const overviewBudgetSelect = document.getElementById('overviewBudgetSelect');
+            if (overviewBudgetSelect) {
+                overviewBudgetSelect.addEventListener('change', function() {
+                    loadBudgetData(this.value);
+                });
+            }
         }
+        
+        // Initialize when page loads
+        window.onload = initDashboard;
     </script>
 </body>
 </html>
